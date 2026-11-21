@@ -1,0 +1,30 @@
+Create ONE original fictional adult character portrait for Subjective Guess Who, part of a consistent cast of 72 polished 3D caricatures.
+
+ART DIRECTION
+An appealing, expressive adult cast with high-end animated-film-quality 3D rendering. Use deliberately sculpted facial forms, coherent anatomy, restrained caricature, natural adult eye proportions, and characterful asymmetry. Each person needs their own silhouette and facial structure. Give hair, skin, fabric, metal and glasses distinct convincing materials. Skin should have subtle texture and soft subsurface shading. The result must read as designed 3D character art, rather than a photographic headshot, flat illustration, or plastic toy.
+
+CONSISTENT FRAMING AND LIGHT
+Portrait aspect ratio 8:9; ideally export 1024 x 1152 pixels or larger at the same ratio. Show the head, both shoulders and upper chest. Face approximately frontal with a slight natural turn; gaze toward the viewer. Keep the entire hairstyle or hat inside the frame, with approximately 8% headroom. Use the same camera distance across the cast. Place the character against a simple warm ivory seamless studio background. Use a large soft key light from the upper left, gentle fill and subtle rim light. Keep shadows soft and the image readable at 80 pixels wide.
+
+CHARACTER TO CREATE
+Ezra is a fictional 54-year-old man. Dry intellectual amusement with a sharply lifted brow.
+
+REQUIRED APPEARANCE
+Approximate age: 50s. Adult masculine presentation.
+Skin tone: light. Face shape: long. Nose: pronounced and aquiline.
+Eyes: blue, deep set.
+Hair: thick loose curls; colour salt and pepper; texture curly.
+Facial hair: full moustache; dark grey. Glasses: none.
+Headwear: none. Earrings: none.
+Clothing: velvet jacket in plum, with charcoal accents.
+Visible details: fine lines between brows.
+Expression: Dry intellectual amusement with a sharply lifted brow.
+
+STYLE REFERENCE
+If an approved style reference is supplied, match only its rendering style, lighting, framing and material treatment. Preserve the character brief's own age, skin tone, facial structure, hair, clothing and expression. Do not copy the reference person's identity. Reuse the same approved style reference for subsequent characters.
+
+CONSTRAINTS
+Exactly one adult. No words, name labels, lettering, watermark, logo, frame, collage, contact sheet, extra people, props or visible hands. Avoid enormous baby eyes, childlike proportions, interchangeable generic faces, vacant identical smiles, grotesque anatomy, over-glossy skin, warped glasses, floating jewellery, and clipped hair or hats. Do not add unrequested accessories. Features marked "none" must be absent.
+
+DELIVERABLE
+Return the portrait as sgw-022.png. Keep metadata outside the image. The requested traits describe the target; they are not verified observations of the finished image. If the output misses a required feature, identify the mismatch so it can be regenerated or the observed metadata corrected.

@@ -7,6 +7,7 @@ This repository is implemented locally. **No production deployment or managed-ba
 - [ ] Create or select GitHub, Supabase, Vercel, and hCaptcha or Cloudflare Turnstile accounts/projects.
 - [ ] Provide the Supabase URL and **public publishable key** via local/Vercel configuration, never secrets in chat.
 - [ ] Apply the database migration and enable anonymous Auth and private Realtime.
+- [ ] Enable Email Auth, confirmed emails, secure email changes, manual identity linking for guests, a 12-character server password minimum, and working SMTP. Add email codes to the signup, email-change and reset templates; follow [account setup](SETUP.md#email-and-password-accounts).
 - [ ] Configure CAPTCHA: public site key in Vercel, private secret only in Supabase Auth, correct allowed hostnames.
 - [ ] Select the final game name/domain and check naming/trademark availability.
 - [ ] Set a monitored `VITE_SUPPORT_EMAIL`; review the privacy page for the actual operator and retention practices.
@@ -79,6 +80,28 @@ npx vercel --prod
 
 Environment variables are compiled by Vite. Changing them requires a new deployment. No secret or service-role key belongs in this static frontend. [Vercel Vite deployment](https://vercel.com/docs/frameworks/frontend/vite), [environment changes](https://vercel.com/docs/environment-variables/managing-environment-variables).
 
+### If the deployed website says Local preview
+
+Your computer's `.env.local` is ignored by Git and is not uploaded to Vercel. Configure the hosted build separately:
+
+1. Open your project in Vercel, then **Settings → Environment Variables**.
+2. Add the following values for **Production** (and Preview too if you want online play on preview deployments):
+
+| Name | Value |
+| ---- | ----- |
+| `VITE_SUPABASE_URL` | Your Supabase project URL, copied from `.env.local` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Your public browser key, copied from `.env.local` |
+| `VITE_HCAPTCHA_SITE_KEY` | Your public hCaptcha site key |
+| `VITE_APP_URL` | Your live frontend URL, such as `https://subjective-guess-who.vercel.app`, without a trailing slash |
+| `VITE_SUPPORT_EMAIL` | Your public support email address |
+
+For hCaptcha, leave `VITE_TURNSTILE_SITE_KEY` unset or empty. The CAPTCHA secret stays in Supabase Auth's CAPTCHA settings; it does not belong in Vercel's frontend variables. Do not upload `.env.local` or add it to Git.
+
+3. Set your Supabase Auth **Site URL** to the live frontend URL. If you use hCaptcha's domain allowlist, add the live hostname, such as `subjective-guess-who.vercel.app`, without a protocol or path.
+4. Open Vercel **Deployments**, choose the latest production deployment, and select **Redeploy**. Confirm the deployment uses the saved Production variables. Refresh the live website after the deployment is ready. Saving variables alone does not change an existing deployment.
+
+Both Supabase variables are required to switch the app from Local preview to online play. If only one is set, the app shows an incomplete-configuration error. After switching to online mode, create a new online room; the preview code `PREVIEW` cannot be used on another device.
+
 ## 4. Verify the live deployment
 
 Use two independent browser profiles on different devices/networks, then the complete [SETUP.md](SETUP.md) checklist. Also verify:
@@ -104,3 +127,24 @@ The basic privacy page explains anonymous sessions, room/question storage, local
 ## 6. Optional custom domain
 
 Add the domain in Vercel Project Settings → Domains and apply exactly the DNS records Vercel provides. Wait for domain/HTTPS verification. Update `VITE_APP_URL`, Supabase Auth Site URL/allowed origins, and your CAPTCHA provider's allowed hostnames; redeploy and test invitation links again.
+
+## Gameplay v2 rollout
+
+1. In the linked checkout, run `npx supabase db push --remote --dry-run`, verify the project target, and apply all pending migrations, including `202611160001_game_v2.sql`, `202611160002_board_choices.sql`, and `202611170001_folder_boards.sql`, with `npx supabase db push --remote`.
+2. The migration expands the schema and adds versioned RPCs. Existing version 1 rooms keep their original rules/portraits; updated clients create version 2 rooms. Do not edit or replay the original migration.
+3. Run the isolated integration tests in TESTING.md, then deploy the updated frontend with the public environment values above. New RPC-not-found errors indicate a missing migration, rather than missing frontend configuration.
+4. Verify hCaptcha, two-device play, pause/resume, and Find a player on the deployed frontend. Review the generated casts and phone screenshots before inviting players.
+
+Matchmaking uses a FIFO queue filtered by board preference with the 120/30/60 preset. Tickets lease for 30 seconds with ten-second visible-page renewals; matched players have two minutes to choose and ready. The existing retention job now also removes abandoned tickets and stale reaction-rate records. Game heartbeats run every 15 seconds, returning a complete snapshot only when the room version changes. Match and game notifications contain no secret choices or queued question text.
+
+The earlier board migration added `create_room_board_v2` and `matchmake_board_v2`. The folder-board upgrade below supersedes its selectable packs and adds server preparation. Existing rooms retain their saved faces; new games require the current backend configuration. Source records remain in `artwork/one-million-faces/README.md`, with current instructions in BOARDS.md. No monetization is enabled.
+
+The web app manifest and icons support standalone installation. Gameplay still connects to Supabase; native iOS/Android packaging remains a separate future task.
+
+## Folder-board and online-face rollout
+
+Follow [BOARDS.md](BOARDS.md): apply the additive migration, set **server-only** `SUPABASE_SECRET_KEY` in Vercel alongside the public Supabase values, then redeploy. It must be a Supabase secret/service_role key, not an hCaptcha secret, and must never have a `VITE_` prefix. The app uses a Vercel function, not a separately deployed Edge Function.
+
+The migration creates the public-read, server-write `game-faces` Storage bucket. The frontend's CSP now permits Supabase-hosted images, and SPA routing excludes `/api/boards`, cached portraits and the generated sharing banner. Verify the deployed API returns JSON and never exposes its privileged key. Legacy asset URLs still resolve.
+
+Check live online acquisition, an outage fallback, shared preparation on two devices, retry after failure, a custom 24+ image folder, matching and rematches. Adding later folders needs only the normal build/deployment, with no per-board SQL. `npm run brand` and production builds create `social-preview.png` using the owner's logo and bundled fonts. See TESTING.md for automated and hosted-test boundaries.

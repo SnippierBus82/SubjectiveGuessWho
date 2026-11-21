@@ -33,6 +33,8 @@ No `.env` file is necessary for local preview. Create a game and use **Switch se
 
 ## 2. Create a managed Supabase project
 
+**Updating an existing project:** run the dry-run and push commands below to apply all pending migrations. The gameplay upgrade is `202611160001_game_v2.sql`; board selection is `202611160002_board_choices.sql`, and folder/online-first boards are `202611170001_folder_boards.sql`. Do not rerun the original migration manually or reset your hosted database. Deploy the updated frontend after migrations succeed. Existing games keep their original rules; new games use the updated flow.
+
 ### Create and link the project
 
 1. Open the [Supabase dashboard](https://supabase.com/dashboard) and create a project. Choose a suitable region and save its database password in your password manager. Wait until the project is ready.
@@ -61,7 +63,7 @@ First preview the pending changes without applying them:
 npx supabase db push --remote --dry-run
 ```
 
-Check that the `Target:` line names your intended hosted project. On a new database, the pending migration should be `202611150001_game.sql`. Then apply it:
+Check that the `Target:` line names your intended hosted project. A new database needs `202611150001_game.sql`, `202611160001_game_v2.sql`, `202611160002_board_choices.sql`, and `202611170001_folder_boards.sql` in that order; an existing database should list only migrations not already applied. Then apply them:
 
 ```sh
 npx supabase db push --remote
@@ -99,7 +101,7 @@ The result should be **24**. Continue with Auth and Realtime below; creating the
 
 ## 3. Configure Auth and realtime
 
-- Enable **Anonymous sign-ins** in Supabase Authentication settings. Anonymous users still use the `authenticated` database role. Do not add email/password account forms.
+- Enable **Anonymous sign-ins** for guest play and the **Email** provider for accounts. Both guests and email accounts use the `authenticated` database role. Follow the email/password configuration below.
 - Set the Auth Site URL to your frontend origin. Add only the development and preview redirect origins you use. This app does not use an email redirect flow.
 - For a public project, configure **hCaptcha or Cloudflare Turnstile**. In Supabase, open **Authentication → Bot and Abuse Protection → CAPTCHA protection** (the dashboard may group this under Authentication settings), enable protection, select your provider, and save its **secret key there**. Only its public **site key** goes into the frontend.
 - The frontend renders the selected provider when a new anonymous session needs one, passes the token to `signInAnonymously`, and restores existing sessions without making a new user.
@@ -107,7 +109,7 @@ The result should be **24**. Continue with Auth and Realtime below; creating the
 - Enable Realtime; prefer its private-only channel setting for this dedicated project. The migration adds membership RLS policies to `realtime.messages`. No application tables need to be added to Postgres Changes publications: RPCs call `realtime.send` with a small version notification.
 - Realtime must be able to create its daily Broadcast message partition. Establish a frontend connection before diagnosing missing database broadcasts. [Supabase Broadcast documentation](https://supabase.com/docs/guides/realtime/broadcast).
 
-## 4. Add public frontend configuration
+## 4. Configure the frontend and board server
 
 Create `.env.local` in the project root by copying `.env.example`. In PowerShell, run the following only if you do not already have a `.env.local` file:
 
@@ -124,14 +126,22 @@ VITE_HCAPTCHA_SITE_KEY=YOUR_PUBLIC_HCAPTCHA_SITE_KEY
 VITE_TURNSTILE_SITE_KEY=
 VITE_APP_URL=http://localhost:5173
 VITE_SUPPORT_EMAIL=YOUR_SUPPORT_ADDRESS
+SUPABASE_SECRET_KEY=YOUR_SERVER_SECRET_KEY
 ```
 
 The placeholders are not working credentials. Get the URL and **publishable** key from the project's Connect/API settings. A local Supabase legacy `anon` JWT can also occupy the publishable-key variable; never use `service_role` or a secret key. The app rejects known administrative key formats.
+
+For `SUPABASE_SECRET_KEY`, open your Supabase project's **Settings → API Keys → Publishable and secret API keys**, then copy or create a secret key (`sb_secret_...`). See [Supabase's API key guide](https://supabase.com/docs/guides/getting-started/api-keys). This variable is server-only: never give it a `VITE_` prefix. It is separate from your CAPTCHA secret.
+
+Online play requires this server key **both locally and on Vercel**: `/api/boards` uses it to prepare the shared board and save selected AI images. Vercel environment variables are separate from `.env.local`; configure each environment you use. Restart Vite after editing `.env.local`, or redeploy after changing Vercel variables. An older deployed version may have worked without this board-preparation endpoint.
+
+For single-device preview without a server key, leave both public Supabase URL/key values empty. Setting both selects online mode, even on localhost.
 
 | Variable                        | Visibility                                   | Required                                   |
 | ------------------------------- | -------------------------------------------- | ------------------------------------------ |
 | `VITE_SUPABASE_URL`             | Public, compiled into JavaScript             | Online play                                |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Public browser key, compiled into JavaScript | Online play                                |
+| `SUPABASE_SECRET_KEY`          | Server-only; never compiled into the frontend | Online board preparation locally and on Vercel |
 | `VITE_TURNSTILE_SITE_KEY`       | Public                                       | CAPTCHA enabled with Turnstile; leave hCaptcha empty |
 | `VITE_HCAPTCHA_SITE_KEY`        | Public                                       | CAPTCHA enabled with hCaptcha; leave Turnstile empty |
 | `VITE_APP_URL`                  | Public canonical origin                      | Optional; falls back to current origin     |
@@ -142,6 +152,22 @@ Restart Vite after editing `.env.local`. Every `VITE_` value is public. Database
 To restart, press Ctrl+C in the terminal running Vite, then run `npm run dev` again. With both Supabase values filled in, the app switches to online mode and should stop showing the single-device preview. Set only the site key for the provider selected in Supabase. hCaptcha takes precedence if both are filled in. For Turnstile, leave `VITE_HCAPTCHA_SITE_KEY` empty and fill in `VITE_TURNSTILE_SITE_KEY`. Leave both CAPTCHA site keys empty only if CAPTCHA is disabled for your private development project.
 
 If the app still shows preview mode, check that the file is named exactly `.env.local` (not `.env.local.txt`), sits beside `package.json`, and contains both Supabase values. Then restart Vite.
+
+### Email and password accounts
+
+The Profile screen supports account creation, email/password login, password reset and email/password changes. Player names are display names, not login identifiers. Guests can still play without an account.
+
+In **Supabase Authentication → Sign In / Providers → Email**, enable email sign-ups and **Confirm email**, keep **Secure email change** enabled, and set the server's minimum password length to **12**. Enable leaked-password protection if available for your plan. Keep Auth rate limits and CAPTCHA enabled for public use. The app checks length for usability; Supabase must enforce the password policy. Passwords go directly to Supabase Auth and are never written to profile metadata or browser storage.
+
+In **Authentication → Email Templates**, include `<p>Your code: {{ .Token }}</p>` in **Confirm signup**, **Change email address** and **Reset password**. Keep their existing confirmation links too. The app accepts the configured 6–10 digit email code; users can also follow the links. Use a configured SMTP provider for real delivery rather than relying on the restricted development email service. Add your production origin and local development URL, including the `/?page=profile` return URL, to Auth's redirect allowlist.
+
+New accounts confirm their email before playing as a registered user. Converting a guest first verifies the email, then asks for a password; its user ID stays the same. A forgotten-password request gives a generic response, then requires a valid reset code or recovery link before setting a new password. Email/password changes require the current password; email changes must be confirmed using the links sent to the inboxes by Supabase.
+
+Enable **Allow manual linking** in Supabase Auth's identity-linking settings so an existing guest can add an email identity. Without it, a new visitor can create an email account, but guest conversion will be rejected by the provider.
+
+The profile's name, avatar and chosen board live in the signed-in user's `user_metadata.sgw_profile`. This is editable presentation data, never an authorization or entitlement source. Supabase Auth owns access to it, so this change needs **no new database migration**. Logging in on another device loads the profile from Auth; logging out clears the local profile and session. The game shares only the display name with opponents, never the account email.
+
+Reference: [Supabase password authentication](https://supabase.com/docs/guides/auth/passwords), [password security](https://supabase.com/docs/guides/auth/password-security), and [guest account conversion](https://supabase.com/docs/guides/auth/auth-anonymous).
 
 ### Set up hCaptcha
 
@@ -179,12 +205,24 @@ Start with two independent browser profiles on your computer at the Vite address
 3. Pick different secrets; check B cannot see A's choice. Ready up and confirm both boards have the same order.
 4. Ask a question. Verify only B can answer A's question and that YES/NO, active player, and history update on both screens immediately.
 5. Draft while waiting, eliminate a few faces, then refresh. Your secret, draft, and eliminations should return; the other board stays unchanged.
-6. Let both kinds of timer expire. A missed answer must show **No answer**, never YES/NO.
-7. Briefly disable the network or background one tab. Reconnect and check the canonical turn and countdown recover.
-8. Send reactions and try a final guess. Both characters reveal only on the result screen. Test both correct and incorrect guesses and a mutual rematch.
-9. Try a third independent profile: a full room must reject it. Inspect network responses for early secret leakage.
+6. Verify the new 120/30/60-second defaults: question writing and board review overlap. Submit at different points and check the review deadline: 15s → 60s, 50s → 70s, 85s → 105s, 110s → 120s. Done reviewing starts the answer step early once the question is submitted.
+7. Let writing and answering expire. The game must pause without skipping turns or inventing answers. Both players confirm their return to resume. After two minutes, the waiting player can end without a winner. Also test Unlimited room settings: the relevant activity must finish manually.
+8. Briefly disable the network or background one tab. Reconnect and check the canonical turn and countdown recover. A missing heartbeat for 45 seconds pauses an active game; simply returning must not silently resume it.
+9. Open Emoji, send reactions, and mute the opponent. Your own reaction should still appear. Try correct and incorrect final guesses, then a mutual rematch with a fresh cast.
+10. Try a third independent profile: a full room must reject it. Inspect network responses for early secret or submitted-question leakage. On a phone, check keyboard use, portrait enlargement, and the last board row without controls covering it.
+11. In two independent sessions, select Find a player. They should go straight into the same character-selection lobby. Test cancelling a waiting search, refreshing while waiting, and leaving one player unready for two minutes: the ready, connected player should return to the queue with their original priority.
 
 Run [TESTING.md](TESTING.md)'s automated suites too. An online project has not been verified merely because the local preview works.
+
+## Choose a board
+
+The built-in choice is **Random AI faces**. It tries OneMillionFaces online first, for up to 12 seconds, then uses saved faces only if the source is unavailable. Both players receive one saved cast; refresh never swaps faces. A rematch prepares a new cast.
+
+For a custom board, add at least 24 named image files to `public/boards/Your board/`: `Alex.webp` becomes **Alex**. No names file, catalog or per-board SQL is needed. Extra images are sampled down to 24 each game. Development discovers folder changes automatically; commit and deploy the folder to publish it.
+
+**Online preparation also needs one server-only key.** Add `SUPABASE_SECRET_KEY` (your Supabase secret/service_role key, not the hCaptcha secret) to `.env.local` and Vercel. Never give it a `VITE_` prefix. Apply the latest migration, restart Vite and redeploy Vercel. Keep hCaptcha's secret in Supabase Auth. The migration provisions the `game-faces` Storage bucket.
+
+Read [BOARDS.md](BOARDS.md) for the full setup, supported formats, validation, source/license details and troubleshooting. No Hugging Face account or token is required for this public dataset. Test a custom folder and the AI option in two independent browser profiles, then refresh and rematch. Check that both people receive identical faces, order and names.
 
 ## Optional: run Supabase on your computer
 

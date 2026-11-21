@@ -1,37 +1,19 @@
-import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
-import { config } from '../lib/config'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+import { getSupabaseClient } from './client'
 import {
   GameError,
   REACTIONS,
   type GameService,
   type RoomState,
   type Connection,
+  type MatchStatus,
 } from '../game/types'
+import { DEFAULT_TIMINGS } from '../game/timings'
+import { DEFAULT_BOARD } from '../game/boards'
 import { newId } from '../lib/platform'
 
 export function createSupabaseService(): GameService {
-  if (config.key.startsWith('sb_secret_'))
-    throw new Error('Use a publishable Supabase key in the browser.')
-  if (config.key.startsWith('ey')) {
-    try {
-      const payload = JSON.parse(
-        atob(config.key.split('.')[1]!.replace(/-/g, '+').replace(/_/g, '/')),
-      ) as { role?: string }
-      if (payload.role === 'service_role')
-        throw new Error('A service_role key cannot be used in the browser.')
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('service_role')) throw error
-    }
-  }
-  const client = createClient(config.url, config.key, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: false,
-      storageKey: 'sgw-auth',
-    },
-    realtime: { params: { eventsPerSecond: 4 } },
-  })
+  const client = getSupabaseClient()
   let social: RealtimeChannel | undefined
   let lastReaction = 0
   async function ensureSession(captchaToken?: string) {
@@ -40,12 +22,17 @@ export function createSupabaseService(): GameService {
       throw new GameError('Your session could not be restored. Check your connection and retry.')
     if (existing.session) return
     const { error } = await client.auth.signInAnonymously({ options: { captchaToken } })
-    if (error)
-      throw new GameError(
-        error.message.includes('captcha')
-          ? 'Please complete the connection check and try again.'
-          : 'Could not connect. Check anonymous sign-ins and try again.',
-      )
+    if (error) {
+      const message =
+        error.code === 'anonymous_provider_disabled'
+          ? 'Anonymous sign-ins are disabled. Enable them in Supabase Authentication settings.'
+          : error.code === 'captcha_failed' || /captcha/i.test(error.message)
+            ? 'The connection check was rejected. Complete it again; check the CAPTCHA provider and secret in Supabase if this continues.'
+            : error.status === 429
+              ? 'Too many sign-in attempts. Please wait before trying again.'
+              : 'Could not sign in. Check your connection and Supabase Auth settings.'
+      throw new GameError(message)
+    }
   }
   async function rpc(name: string, args: Record<string, unknown>): Promise<RoomState> {
     let startedAt = Date.now()
@@ -60,7 +47,11 @@ export function createSupabaseService(): GameService {
         operation: name,
         code: result.error.code || result.status,
       })
-      throw new GameError('Connection interrupted. Your draft is saved. Please retry.')
+      throw new GameError(
+        result.error.code === 'PGRST202'
+          ? 'The game database needs the latest migrations. See SETUP.md before retrying.'
+          : 'Connection interrupted. Your draft is saved. Please retry.',
+      )
     }
     const response = result.data as { state?: RoomState; error?: string; code?: string } | null
     const clientTiming = { startedAt, receivedAt: Date.now() }
@@ -74,23 +65,57 @@ export function createSupabaseService(): GameService {
       throw new GameError('An unexpected response arrived. Please reconnect.')
     return { ...response.state, clientTiming }
   }
+  async function boardRequest(body: Record<string, unknown>) {
+    const { data } = await client.auth.getSession()
+    if (!data.session) throw new GameError('Reconnect before preparing faces.')
+    const response = await fetch('/api/boards', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${data.session.access_token}`,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(100_000),
+    })
+    const result = await response
+      .json()
+      .catch(() => ({ error: 'The board backend is unavailable. Check the deployment and retry.' }))
+    if (!response.ok || result.error)
+      throw new GameError(result.error ?? 'Could not prepare the board.')
+    return result as { state?: RoomState }
+  }
   return {
     mode: 'online',
     session: async () => Boolean((await client.auth.getSession()).data.session),
-    create: async (name, requestId, captcha) => {
+    create: async (
+      name,
+      requestId,
+      captcha,
+      settings = DEFAULT_TIMINGS,
+      boardId = DEFAULT_BOARD,
+    ) => {
       await ensureSession(captcha)
-      return rpc('create_room', { p_nickname: name, p_request_id: requestId })
+      await boardRequest({ operation: 'register', boardId })
+      return rpc('create_room_board_v2', {
+        p_nickname: name,
+        p_request_id: requestId,
+        p_settings: settings,
+        p_board_id: boardId,
+      })
     },
     join: async (code, name, captcha) => {
       await ensureSession(captcha)
-      return rpc('join_room', { p_code: code, p_nickname: name })
+      return rpc('join_room_v2', { p_code: code, p_nickname: name })
     },
     snapshot: async (roomId) => {
       await ensureSession()
-      return rpc('get_room', { p_room_id: roomId })
+      return rpc('get_room_v2', { p_room_id: roomId })
     },
+    prepareBoard: async (state) =>
+      (await boardRequest({ operation: 'prepare', roomId: state.roomId, gameId: state.game.id }))
+        .state ?? null,
     action: (state, kind, payload, actionId) =>
-      rpc('game_action', {
+      rpc('game_action_v2', {
         p_room_id: state.roomId,
         p_game_id: state.game.id,
         p_turn: state.game.turn,
@@ -163,17 +188,57 @@ export function createSupabaseService(): GameService {
         void client.removeChannel(socialChannel)
       }
     },
-    react: async (emoji, you) => {
-      if (!REACTIONS.some((e) => e === emoji) || Date.now() - lastReaction < 1200) return
+    heartbeat: async (roomId, version) => {
+      const { data, error } = await client.rpc('heartbeat_room_v2', {
+        p_room_id: roomId,
+        p_version: version,
+      })
+      if (error || data?.error)
+        throw new GameError(data?.error || 'Could not reconnect.', undefined, data?.code)
+      return data?.state ?? null
+    },
+    match: async (name, command, captcha, boardId = DEFAULT_BOARD) => {
+      await ensureSession(captcha)
+      if (command === 'join') await boardRequest({ operation: 'register', boardId })
+      const { data, error } = await client.rpc('matchmake_board_v2', {
+        p_nickname: name,
+        p_command: command,
+        p_board_id: boardId,
+      })
+      if (error || data?.error)
+        throw new GameError(
+          data?.error ||
+            (error?.code === 'PGRST202'
+              ? 'Apply the latest database migration to enable player search.'
+              : 'Player search could not connect. Try again.'),
+        )
+      return data as MatchStatus
+    },
+    subscribeMatch: async (invalidate) => {
+      const { data } = await client.auth.getSession()
+      if (!data.session) return () => {}
+      const channel = client
+        .channel(`match:${data.session.user.id}`, { config: { private: true } })
+        .on('broadcast', { event: 'match' }, invalidate)
+        .subscribe()
+      return () => {
+        void client.removeChannel(channel)
+      }
+    },
+    react: async (emoji, _you, id = newId()) => {
+      if (!REACTIONS.some((e) => e === emoji) || Date.now() - lastReaction < 1000) return
       if (!social) throw new GameError('Reactions will return when you reconnect.')
       lastReaction = Date.now()
-      const result = await social.send({
-        type: 'broadcast',
-        event: 'reaction',
-        payload: { id: newId(), emoji, from: you },
+      const roomId = social.topic.replace(/^realtime:social:/, '').replace(/^social:/, '')
+      const { data, error } = await client.rpc('send_reaction_v2', {
+        p_room_id: roomId,
+        p_id: id,
+        p_emoji: emoji,
       })
-      if (result !== 'ok')
-        throw new GameError('That reaction could not be sent. Try again when connected.')
+      if (error || data?.error)
+        throw new GameError(
+          data?.error || 'That reaction could not be sent. Try again when connected.',
+        )
     },
   }
 }

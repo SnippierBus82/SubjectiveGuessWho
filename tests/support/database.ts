@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import pg from 'pg'
 import type { RoomState } from '../../src/game/types'
 
@@ -21,6 +21,8 @@ const bootstrap = `
     if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
   end $$;
   create schema auth;
+  create schema storage;
+  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
   create table auth.users (id uuid primary key, is_anonymous boolean default true, created_at timestamptz default now());
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
   grant usage on schema public, auth to authenticated, anon;
@@ -55,16 +57,13 @@ export async function makeDatabase() {
       'Refusing to modify an existing database. Use a new empty disposable database, never production.',
     )
   }
-  const migration = await readFile(
-    new URL('../../supabase/migrations/202611150001_game.sql', import.meta.url),
-    'utf8',
-  )
-  if (embedded) {
-    await embedded.exec(bootstrap)
-    await embedded.exec(migration)
-  } else {
-    await pool!.query(bootstrap)
-    await pool!.query(migration)
+  const migrationDir = new URL('../../supabase/migrations/', import.meta.url)
+  if (embedded) await embedded.exec(bootstrap)
+  else await pool!.query(bootstrap)
+  for (const file of (await readdir(migrationDir)).filter((file) => file.endsWith('.sql')).sort()) {
+    const migration = await readFile(new URL(file, migrationDir), 'utf8')
+    if (embedded) await embedded.exec(migration)
+    else await pool!.query(migration)
   }
   for (const id of users) await admin.query('insert into auth.users(id) values ($1)', [id])
   async function as<T>(
@@ -97,7 +96,21 @@ export async function makeDatabase() {
       client.release()
     }
   }
-  const allowed = ['create_room', 'join_room', 'get_room', 'game_action']
+  const allowed = [
+    'create_room',
+    'join_room',
+    'get_room',
+    'game_action',
+    'create_room_v2',
+    'create_room_board_v2',
+    'join_room_v2',
+    'get_room_v2',
+    'game_action_v2',
+    'matchmake_v2',
+    'matchmake_board_v2',
+    'send_reaction_v2',
+    'heartbeat_room_v2',
+  ]
   async function rpc(user: string | null, name: string, args: unknown[]): Promise<RpcResponse> {
     if (!allowed.includes(name)) throw new Error('Unknown RPC in test harness')
     return as(user, async (db) => {
@@ -115,11 +128,11 @@ export async function makeDatabase() {
     reset: async () => {
       if (embedded)
         await embedded.exec(
-          'truncate public.rooms cascade; truncate private.rate_limits; truncate realtime.messages;',
+          'truncate public.rooms cascade; truncate private.rate_limits; truncate private.match_queue; truncate private.reaction_clock; truncate realtime.messages;',
         )
       else
         await pool!.query(
-          'truncate public.rooms cascade; truncate private.rate_limits; truncate realtime.messages;',
+          'truncate public.rooms cascade; truncate private.rate_limits; truncate private.match_queue; truncate private.reaction_clock; truncate realtime.messages;',
         )
     },
     close: async () => {

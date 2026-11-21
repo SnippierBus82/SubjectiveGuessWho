@@ -18,5 +18,8 @@ for (const [packagePath, entry] of Object.entries(lock.packages)) {
     `${pkg.name} ${pkg.version}\n${'='.repeat(60)}\n${texts.join('\n\n') || `License identifier: ${JSON.stringify(pkg.license)}`}`,
   )
 }
-await writeFile(new URL('public/THIRD_PARTY_NOTICES.txt', root), `${sections.join('\n\n\n')}\n`)
+await writeFile(
+  new URL('public/THIRD_PARTY_NOTICES.txt', root),
+  `${sections.join('\n\n\n').trimEnd()}\n`,
+)
 console.log(`Preserved notices for ${sections.length - 1} production packages.`)

@@ -18,15 +18,23 @@
     "test:postgres": "node --experimental-strip-types scripts/postgres-check.ts",
     "load": "node --experimental-strip-types scripts/load-test.ts",
     "assets": "node scripts/create-portraits.mjs",
-    "notices": "node scripts/create-notices.mjs"
+    "notices": "node scripts/create-notices.mjs",
+    "postinstall": "node --experimental-strip-types scripts/boards.ts",
+    "predev": "node --experimental-strip-types scripts/boards.ts --development",
+    "prebuild": "node --experimental-strip-types scripts/boards.ts && node scripts/brand.mjs",
+    "pretest": "node --experimental-strip-types scripts/boards.ts",
+    "pretypecheck": "node --experimental-strip-types scripts/boards.ts",
+    "brand": "node scripts/brand.mjs"
   },
   "dependencies": {
     "@fontsource/dm-sans": "^5.2.8",
     "@fontsource/fredoka": "^5.2.8",
     "@supabase/supabase-js": "^2.119.0",
+    "@vercel/functions": "^3.11.3",
     "lucide-react": "^0.468.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
@@ -38,6 +46,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "opentype.js": "^2.0.0",
     "pg": "^8.16.3",
     "tailwindcss": "^4.3.5",
     "typescript": "~5.9.3",

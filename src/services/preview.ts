@@ -1,213 +1,342 @@
-// A single-device, two-seat preview. This module is never the online authority.
-// Both secrets exist in local storage; the UI labels this limitation throughout.
-import { characterCount, trimQuestion } from '../game/rules'
-import { characters } from '../game/characters'
+import {
+  selectFolderBoard,
+  DEFAULT_BOARD,
+  isBoardId,
+  boardInfo,
+  type BoardId,
+} from '../game/boards'
+import type { Character } from '../game/characters'
+import { DEFAULT_TIMINGS, reviewEnd, validTimings } from '../game/timings'
 import {
   GameError,
   REACTIONS,
   type GameService,
   type RoomState,
+  type Timings,
   type SubscriptionCallbacks,
 } from '../game/types'
 import { newId, storage } from '../lib/platform'
-
-interface PreviewRecord {
+import { createPreviewService as legacyPreview } from './legacy-preview'
+interface RecordV2 {
   state: RoomState
   secrets: Record<string, string>
+  submission: string | null
   seat: number
   receipts: string[]
 }
 const seats = ['preview-one', 'preview-two'] as const
+const iso = (n: number | null) => (n === null ? null : new Date(n).toISOString())
+const due = (n: number | null) => (n === null ? null : iso(Date.now() + n * 1000))
 export function createPreviewService(): GameService {
-  let record = storage.read<PreviewRecord | null>('preview', null)
+  const legacy = legacyPreview()
+  let record = storage.read<RecordV2 | null>('preview2', null)
   let callbacks: SubscriptionCallbacks | undefined
   let lastReaction = 0
-  const save = () => {
-    storage.write('preview', record)
+  const save = () => storage.write('preview2', record)
+  function view(): RoomState {
+    if (!record) throw new GameError('Start a fresh local preview from Home.')
+    const s = structuredClone(record.state)
+    s.you = seats[record.seat]!
+    s.myCharacter = record.secrets[s.you] ?? null
+    s.reveals = s.game.phase === 'finished' ? { ...record.secrets } : null
+    s.game.flow!.ownSubmission = s.game.activePlayer === s.you ? record.submission : null
+    s.serverNow = new Date().toISOString()
+    return s
   }
-  function view() {
-    if (!record) throw new GameError('Start a fresh local preview from the home screen.')
-    const you = seats[record.seat]!
-    const state = structuredClone(record.state)
-    state.you = you
-    state.myCharacter = record.secrets[you] ?? null
-    state.reveals = state.game.phase === 'finished' ? { ...record.secrets } : null
-    state.serverNow = new Date().toISOString()
-    return state
+  async function fresh(
+    name: string,
+    settings: Timings,
+    names?: string[],
+    boardId: BoardId = DEFAULT_BOARD,
+  ) {
+    const id = newId()
+    let board: Character[],
+      source: 'folder' | 'online' | 'cache' = 'folder'
+    if (boardId === DEFAULT_BOARD) {
+      const response = await fetch('/api/boards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation: 'preview', boardId }),
+      })
+      const result = await response.json()
+      if (!response.ok || !Array.isArray(result.characters) || result.characters.length !== 24)
+        throw new GameError(result.error ?? 'Could not prepare the preview faces.')
+      board = result.characters
+      source = result.source
+    } else board = selectFolderBoard(boardId)
+    record = {
+      seat: 0,
+      secrets: {},
+      submission: null,
+      receipts: [],
+      state: {
+        roomId: 'preview',
+        code: 'PREVIEW',
+        rulesVersion: 2,
+        settings: { ...settings },
+        mode: 'private',
+        boardId,
+        board,
+        boardStatus: 'ready',
+        boardSource: source,
+        boardLabel: boardInfo(boardId).name,
+        version: 1,
+        serverNow: new Date().toISOString(),
+        you: seats[0],
+        players: seats.map((id, i) => ({
+          id,
+          name: names?.[i] ?? (i ? 'Seat two' : name),
+          slot: i + 1,
+          ready: false,
+          rematchReady: false,
+        })),
+        game: {
+          id,
+          packId: boardId,
+          phase: 'lobby',
+          turn: 0,
+          activePlayer: null,
+          deadline: null,
+          winner: null,
+          guesser: null,
+          guessCharacter: null,
+          result: null,
+          pause: null,
+          endReason: null,
+          flow: {
+            startedAt: null,
+            writingDeadline: null,
+            reviewDeadline: null,
+            submitted: false,
+            reviewReady: true,
+            ownSubmission: null,
+          },
+        },
+        myCharacter: null,
+        reveals: null,
+        history: [],
+      },
+    }
+    save()
+    return view()
+  }
+  function begin(user: string, first = false) {
+    const s = record!.state,
+      g = s.game
+    record!.submission = null
+    Object.assign(g, {
+      phase: 'question',
+      activePlayer: user,
+      turn: first ? 1 : g.turn + 1,
+      deadline: due(s.settings!.question),
+      pause: null,
+      flow: {
+        startedAt: iso(Date.now()),
+        writingDeadline: due(s.settings!.question),
+        reviewDeadline: null,
+        submitted: false,
+        reviewReady: first,
+        ownSubmission: null,
+      },
+    })
+  }
+  function release() {
+    const s = record!.state,
+      g = s.game
+    s.history.push({
+      id: newId(),
+      turn: g.turn,
+      asker: g.activePlayer!,
+      text: record!.submission!,
+      answer: null,
+      status: 'pending',
+      askedAt: iso(Date.now())!,
+    })
+    g.phase = 'answer'
+    g.deadline = due(s.settings!.answer)
   }
   function advance() {
-    if (!record?.state.game.deadline) return
-    const game = record.state.game
-    const now = Date.now(),
-      deadline = Date.parse(game.deadline!)
-    if (now < deadline) return
-    if (game.phase === 'answer') {
-      const question = record.state.history.find((q) => q.turn === game.turn)
-      if (question) question.status = 'unanswered'
+    if (!record) return
+    const s = record.state,
+      g = s.game
+    if (
+      !g.deadline ||
+      Date.now() < Date.parse(g.deadline) ||
+      !['question', 'answer'].includes(g.phase)
+    )
+      return
+    if (g.phase === 'question' && g.flow!.submitted) {
+      g.flow!.reviewReady = true
+      release()
+    } else {
+      const missing =
+        g.phase === 'answer' ? seats.find((x) => x !== g.activePlayer)! : g.activePlayer
+      const saved = { phase: g.phase, deadline: g.deadline }
+      g.pause = { reason: 'timeout', since: g.deadline, missing, resumeReady: [] }
+      g.phase = 'paused'
+      g.deadline = null
+      storage.write('preview2:pause', saved)
     }
-    const steps = 1 + Math.floor((now - deadline) / 30000)
-    if (steps % 2) game.activePlayer = seats.find((id) => id !== game.activePlayer)!
-    game.phase = 'question'
-    game.turn += steps
-    game.deadline = new Date(deadline + steps * 30000).toISOString()
-    record.state.version++
+    s.version++
     save()
   }
   return {
     mode: 'preview',
     session: async () => true,
-    create: async (name) => {
-      record = {
-        seat: 0,
-        secrets: {},
-        receipts: [],
-        state: {
-          roomId: 'preview',
-          code: 'PREVIEW',
-          version: 1,
-          serverNow: new Date().toISOString(),
-          you: seats[0],
-          players: seats.map((id, i) => ({
-            id,
-            name: i ? 'Seat two' : name,
-            slot: i + 1,
-            ready: false,
-            rematchReady: false,
-          })),
-          game: {
-            id: newId(),
-            packId: 'original',
-            phase: 'lobby',
-            turn: 0,
-            activePlayer: null,
-            deadline: null,
-            winner: null,
-            guesser: null,
-            guessCharacter: null,
-            result: null,
-          },
-          myCharacter: null,
-          reveals: null,
-          history: [],
-        },
-      }
-      save()
-      return view()
+    create: async (
+      name,
+      _request,
+      _captcha,
+      settings = DEFAULT_TIMINGS,
+      boardId = DEFAULT_BOARD,
+    ) => {
+      if (!validTimings(settings)) throw new GameError('Choose valid timers.')
+      if (!isBoardId(boardId)) throw new GameError('Choose an available board.')
+      return fresh(name, settings, undefined, boardId)
     },
     join: async () => {
       throw new GameError(
         'Online room codes need a configured Supabase backend. Use Create game to explore the local preview.',
       )
     },
-    snapshot: async (roomId) => {
-      if (roomId !== 'preview')
-        throw new GameError(
-          'Online rooms need a configured Supabase backend. Start a local preview from Home.',
-        )
+    snapshot: async (room) => {
+      if (room !== 'preview') throw new GameError('Start a preview from Home.')
+      if (!record) return legacy.snapshot(room)
       advance()
       return view()
     },
-    action: async (state, kind, payload, actionId) => {
+    action: async (state, kind, payload, id) => {
+      if (!record) {
+        const next = await legacy.action(state, kind, payload, id)
+        if (kind === 'rematch' && next.game.phase === 'lobby') {
+          await fresh(
+            next.players[0]!.name,
+            DEFAULT_TIMINGS,
+            next.players.map((p) => p.name),
+          )
+          record!.seat = next.you === 'preview-one' ? 0 : 1
+          record!.state.version = next.version + 1
+          save()
+          return view()
+        }
+        return next
+      }
       advance()
-      if (!record) throw new GameError('Please start a preview first.')
-      if (record.receipts.includes(actionId)) return view()
-      const game = record.state.game,
-        you = seats[record.seat]!
-      const me = record.state.players.find((p) => p.id === you)!
-      const other = record.state.players.find((p) => p.id !== you)!
+      const s = record.state,
+        g = s.game,
+        you = seats[record.seat]!,
+        other = seats.find((x) => x !== you)!,
+        me = s.players.find((p) => p.id === you)!
       const fail = (message: string): never => {
         throw new GameError(message, view())
       }
-      if (
-        state.game.id !== game.id ||
-        (['question', 'answer', 'guess'].includes(kind) && state.game.turn !== game.turn)
-      )
+      if (record.receipts.includes(id)) return view()
+      if (state.game.id !== g.id || state.game.turn !== g.turn)
         fail('The turn has changed. Your draft is still here.')
       if (kind === 'select') {
-        if (game.phase !== 'lobby' || me.ready) fail('Unready before changing your secret.')
-        if (!characters.some((c) => c.id === payload.characterId))
-          fail('Pick a character from the board.')
+        if (g.phase !== 'lobby' || me.ready) fail('Unready before changing your secret.')
+        if (!s.board!.some((c) => c.id === payload.characterId))
+          fail('Choose a character from this board.')
         record.secrets[you] = String(payload.characterId)
       } else if (kind === 'ready' || kind === 'unready') {
-        if (game.phase !== 'lobby') fail('The round has already started.')
-        if (!record.secrets[you]) fail('Pick your secret character first.')
+        if (g.phase !== 'lobby' || !record.secrets[you]) fail('Pick your character first.')
         me.ready = kind === 'ready'
-        if (record.state.players.every((p) => p.ready)) {
-          game.phase = 'question'
-          game.turn = 1
-          game.activePlayer = seats[crypto.getRandomValues(new Uint8Array(1))[0]! % 2]!
-          game.deadline = new Date(Date.now() + 30000).toISOString()
-        }
+        if (s.players.every((p) => p.ready))
+          begin(seats[crypto.getRandomValues(new Uint8Array(1))[0]! % 2]!, true)
       } else if (kind === 'question') {
-        if (game.phase !== 'question' || game.activePlayer !== you)
-          fail('Ask during your question turn.')
-        const text = trimQuestion(String(payload.text ?? '')).trim()
-        if (!text || characterCount(String(payload.text).trim()) > 50) fail('Use 1–50 characters.')
-        record.state.history.push({
-          id: newId(),
-          turn: game.turn,
-          asker: you,
-          text,
-          answer: null,
-          status: 'pending',
-          askedAt: new Date().toISOString(),
-        })
-        game.phase = 'answer'
-        game.deadline = new Date(Date.now() + 15000).toISOString()
-      } else if (kind === 'answer') {
-        if (
-          game.phase !== 'answer' ||
-          game.activePlayer === you ||
-          typeof payload.answer !== 'boolean'
+        if (g.phase !== 'question' || g.activePlayer !== you || g.flow!.submitted)
+          fail('Submit one question on your writing turn.')
+        const text = String(payload.text ?? '').trim()
+        if (!text || Array.from(text).length > 50 || /[\r\n\t]/.test(text))
+          fail('Use 1–50 characters on one line.')
+        record.submission = text
+        g.flow!.submitted = true
+        g.flow!.reviewDeadline = iso(
+          reviewEnd(Date.parse(g.flow!.startedAt!), Date.now(), s.settings!),
         )
-          fail('Switch to the other seat to answer.')
-        const question = record.state.history.find((q) => q.turn === game.turn)!
-        question.answer = Boolean(payload.answer)
-        question.status = 'answered'
-        game.phase = 'question'
-        game.activePlayer = you
-        game.turn++
-        game.deadline = new Date(Date.now() + 30000).toISOString()
+        g.deadline = g.flow!.reviewDeadline
+        if (g.flow!.reviewReady) release()
+      } else if (kind === 'review') {
+        if (g.phase !== 'question' || g.activePlayer === you)
+          fail('Only the reviewing player can finish review.')
+        g.flow!.reviewReady = true
+        g.flow!.reviewDeadline = null
+        if (g.flow!.submitted) release()
+      } else if (kind === 'answer') {
+        if (g.phase !== 'answer' || g.activePlayer === you || typeof payload.answer !== 'boolean')
+          fail('Switch seats to answer the question.')
+        const q = s.history.find((q) => q.turn === g.turn)!
+        q.answer = Boolean(payload.answer)
+        q.status = 'answered'
+        begin(you)
       } else if (kind === 'guess') {
-        if (game.phase !== 'question' || game.activePlayer !== you)
-          fail('Guess during your question turn.')
-        const correct = record.secrets[other.id] === payload.characterId
-        game.phase = 'finished'
-        game.deadline = null
-        game.guesser = you
-        game.guessCharacter = String(payload.characterId)
-        game.result = correct ? 'correct' : 'incorrect'
-        game.winner = correct ? you : other.id
-      } else if (kind === 'rematch') {
-        if (game.phase !== 'finished') fail('Finish this round first.')
-        me.rematchReady = true
-        if (record.state.players.every((p) => p.rematchReady)) {
-          record.secrets = {}
-          record.state.history = []
-          record.state.game = {
-            ...game,
-            id: newId(),
-            phase: 'lobby',
-            turn: 0,
-            activePlayer: null,
-            deadline: null,
-            winner: null,
-            guesser: null,
-            guessCharacter: null,
-            result: null,
-          }
-          record.state.players.forEach((p) => {
-            p.ready = false
-            p.rematchReady = false
+        if (g.phase !== 'question' || g.activePlayer !== you || g.flow!.submitted)
+          fail('Guess before submitting your question.')
+        if (!s.board!.some((c) => c.id === payload.characterId))
+          fail('Choose a character from this board.')
+        const correct = record.secrets[other] === payload.characterId
+        Object.assign(g, {
+          phase: 'finished',
+          deadline: null,
+          guesser: you,
+          guessCharacter: String(payload.characterId),
+          result: correct ? 'correct' : 'incorrect',
+          winner: correct ? you : other,
+          endReason: 'guess',
+        })
+      } else if (kind === 'resume') {
+        if (g.phase !== 'paused') fail('This game is not paused.')
+        const ready = g.pause!.resumeReady
+        if (!ready.includes(you)) ready.push(you)
+        if (ready.length === 2) {
+          const saved = storage.read<{ phase: 'question' | 'answer' }>('preview2:pause', {
+            phase: 'question',
           })
+          g.phase = saved.phase
+          g.pause = null
+          g.deadline = due(g.phase === 'answer' ? s.settings!.answer : s.settings!.question)
+          if (g.phase === 'question') {
+            g.flow!.startedAt = iso(Date.now())
+            g.flow!.writingDeadline = g.deadline
+          }
+        }
+      } else if (kind === 'leave' || kind === 'end') {
+        if (
+          kind === 'end' &&
+          (g.phase !== 'paused' || Date.now() - Date.parse(g.pause!.since) < 120000)
+        )
+          fail('Give the other player two minutes to return, or leave the game.')
+        Object.assign(g, {
+          phase: 'finished',
+          deadline: null,
+          winner: null,
+          result: null,
+          pause: null,
+          endReason: kind === 'end' ? 'timeout' : 'left',
+        })
+      } else if (kind === 'rematch') {
+        if (g.phase !== 'finished') fail('Finish this game first.')
+        me.rematchReady = true
+        if (s.players.every((p) => p.rematchReady)) {
+          const seat = record.seat,
+            version = s.version
+          await fresh(
+            s.players[0]!.name,
+            s.settings!,
+            s.players.map((p) => p.name),
+            isBoardId(s.boardId) ? s.boardId : DEFAULT_BOARD,
+          )
+          record!.seat = seat
+          record!.state.version = version
         }
       }
-      record.receipts.push(actionId)
-      record.state.version++
+      record!.receipts.push(id)
+      record!.state.version++
       save()
       return view()
     },
-    subscribe: async (_roomId, _you, cb) => {
+    subscribe: async (room, you, cb) => {
+      if (!record) return legacy.subscribe(room, you, cb)
       callbacks = cb
       cb.connection('preview')
       cb.presence([...seats])
@@ -215,13 +344,13 @@ export function createPreviewService(): GameService {
         callbacks = undefined
       }
     },
-    react: async (emoji, you) => {
-      if (!REACTIONS.some((e) => e === emoji) || Date.now() - lastReaction < 1200) return
+    react: async (emoji, you, id = newId()) => {
+      if (!REACTIONS.some((e) => e === emoji) || Date.now() - lastReaction < 1000) return
       lastReaction = Date.now()
-      callbacks?.reaction({ id: newId(), emoji, from: you })
+      callbacks?.reaction({ id, emoji, from: you })
     },
     switchSeat: async () => {
-      if (!record) throw new GameError('Start a preview first.')
+      if (!record) return legacy.switchSeat!()
       record.seat = record.seat ? 0 : 1
       advance()
       save()

@@ -1,72 +1,113 @@
-import { expect, test } from '@playwright/test'
-
+﻿import { expect, test } from '@playwright/test'
 test.skip(
-  !process.env.E2E_SUPABASE_URL || !process.env.E2E_SUPABASE_PUBLISHABLE_KEY,
-  'Needs an isolated migrated Supabase test project with anonymous auth enabled; CAPTCHA disabled for automated sign-ins.',
+  !process.env.E2E_SUPABASE_URL ||
+    !process.env.E2E_SUPABASE_PUBLISHABLE_KEY ||
+    !process.env.E2E_SUPABASE_SECRET_KEY,
+  'Needs an isolated migrated Supabase project with anonymous Auth enabled and CAPTCHA disabled for automation.',
 )
-test('two independent browsers play a realtime game, reconnect, and rematch', async ({
+test('two independent players review, answer with secret portraits, reconnect, react and rematch', async ({
   browser,
 }) => {
-  const contextA = await browser.newContext(),
-    contextB = await browser.newContext()
-  const alice = await contextA.newPage(),
-    bob = await contextB.newPage()
+  const ca = await browser.newContext(),
+    cb = await browser.newContext(),
+    alice = await ca.newPage(),
+    bob = await cb.newPage()
   try {
-    await alice.goto('http://127.0.0.1:5174/')
+    await alice.goto('/')
+    await alice.getByRole('button', { name: 'Create game', exact: true }).click()
     await alice.getByLabel('What should your friend call you?').fill('Alice')
     await alice.getByRole('button', { name: 'Create game' }).click()
-    const code = (await alice.locator('.room-code').textContent())!
-    await bob.goto(`http://127.0.0.1:5174/?join=${code}`)
+    const code = await alice.locator('.play-room-id>b').innerText()
+    await bob.goto(`/?join=${code}`)
     await bob.getByLabel('What should your friend call you?').fill('Bob')
     await bob.getByRole('button', { name: 'Join', exact: true }).click()
-    await expect(alice.locator('.opponent-pill')).toContainText('Bob')
-    await alice.getByRole('button', { name: 'Amara, select as your secret' }).click()
-    await bob.getByRole('button', { name: 'Milo, select as your secret' }).click()
-    await alice.getByRole('button', { name: 'I’m ready' }).click()
-    await bob.getByRole('button', { name: 'I’m ready' }).click()
-    await expect(alice.getByRole('heading', { name: 'Read the room.' })).toBeVisible()
-    await expect(bob.getByRole('heading', { name: 'Read the room.' })).toBeVisible()
+    const aliceSecret = await alice.locator('.character-card').nth(0).innerText(),
+      bobSecret = await bob.locator('.character-card').nth(1).innerText()
+    await alice.locator('.character-card').nth(0).click()
+    await bob.locator('.character-card').nth(1).click()
+    await alice.getByRole('button', { name: 'I’m ready', exact: true }).click()
+    await bob.getByRole('button', { name: 'I’m ready', exact: true }).click()
+    await expect(alice.locator('.play-phase .eyebrow')).toContainText('ROUND 1')
     const asker = (await alice.getByRole('button', { name: 'I know who it is' }).isVisible())
-      ? alice
-      : bob
-    const answerer = asker === alice ? bob : alice
-    await asker.locator('#question-input').fill('Would they clap when the plane lands?')
-    await asker.getByRole('button', { name: 'Ask question', exact: true }).click()
-    await expect(answerer.locator('.current-question')).toContainText(
+        ? alice
+        : bob,
+      answerer = asker === alice ? bob : alice
+    await asker
+      .getByLabel('Your question', { exact: true })
+      .fill('Would they clap when the plane lands?')
+    await asker.getByRole('button', { name: 'Ask question' }).click()
+    await expect(answerer.locator('.answer-secret')).toContainText(
+      answerer === alice ? aliceSecret : bobSecret,
+    )
+    await expect(answerer.locator('.asked-question')).toContainText(
       'Would they clap when the plane lands?',
     )
-    await answerer.getByRole('button', { name: 'YES', exact: true }).click()
-    await expect(asker.locator('.history-entry').first()).toContainText('YES')
-    await asker.getByRole('button', { name: 'Ruby, tap to eliminate', exact: true }).click()
-    await asker.locator('#question-input').fill('Would they start a podcast?')
+    await asker.locator('.character-card').nth(6).click()
     await asker.reload()
-    await expect(
-      asker.getByRole('button', { name: 'Ruby, eliminated, tap to restore' }),
-    ).toHaveAttribute('aria-pressed', 'true')
-    await expect(asker.locator('#question-input')).toHaveValue('Would they start a podcast?')
-    await expect(
-      answerer.getByRole('button', { name: 'Ruby, tap to eliminate', exact: true }),
-    ).toHaveAttribute('aria-pressed', 'false')
-    await expect(asker.locator('.connection-pill')).toContainText('Connected')
-    await asker.getByRole('button', { name: 'React 😂' }).click()
-    await expect(answerer.locator('.floating-reaction')).toHaveText('😂')
-    await answerer.getByRole('button', { name: 'I know who it is' }).click()
-    await answerer
-      .getByRole('button', { name: `${answerer === alice ? 'Milo' : 'Amara'}, make a final guess` })
+    await expect(asker.locator('.character-card').nth(6)).toHaveAttribute('aria-pressed', 'true')
+    await answerer.getByRole('button', { name: 'YES', exact: true }).click()
+    await expect(asker.locator('.verdict-badge')).toContainText('YES')
+    await answerer.getByLabel('Your question', { exact: true }).fill('Would they start a podcast?')
+    await answerer.reload()
+    await expect(answerer.getByLabel('Your question', { exact: true })).toHaveValue(
+      'Would they start a podcast?',
+    )
+    await answerer.getByRole('button', { name: 'Ask question' }).click()
+    await expect(asker.getByText('Would they start a podcast?', { exact: false })).toHaveCount(0)
+    await asker.getByRole('button', { name: 'Done reviewing' }).click()
+    await expect(asker.locator('.asked-question')).toContainText('Would they start a podcast?')
+    await asker.getByRole('button', { name: 'NO', exact: true }).click()
+    await expect(answerer.locator('.verdict-badge')).toContainText('NO')
+    await asker.getByRole('button', { name: 'Emoji', exact: true }).click()
+    await asker.getByRole('button', { name: 'React 😂', exact: true }).click()
+    await expect(answerer.locator('.reaction-float')).toHaveCount(1)
+    await asker.getByRole('button', { name: 'I know who it is' }).click()
+    await asker
+      .getByRole('button', {
+        name: `${asker === alice ? bobSecret : aliceSecret}, make a final guess`,
+        exact: true,
+      })
       .click()
-    await answerer.getByRole('button', { name: 'That’s my final guess' }).click()
-    await expect(
-      answerer.getByRole('heading', { name: 'You know the type.', exact: true }),
-    ).toBeVisible()
-    await expect(asker.locator('.revealed-characters')).toContainText('Amara')
-    await expect(asker.locator('.revealed-characters')).toContainText('Milo')
-    await alice.getByRole('button', { name: 'One more round?' }).click()
-    await bob.getByRole('button', { name: 'One more round?' }).click()
-    await expect(alice.getByRole('heading', { name: 'Who’s your person?' })).toBeVisible()
-    await expect(bob.getByRole('heading', { name: 'Who’s your person?' })).toBeVisible()
-    await expect(alice.locator('.secret-preview')).not.toContainText('Amara')
+    await asker.getByRole('button', { name: 'Confirm final guess' }).click()
+    await expect(asker.getByRole('heading', { name: 'You called it.' })).toBeVisible()
+    await expect(answerer.locator('.result-cast img')).toHaveCount(2)
+    await alice.getByRole('button', { name: 'Play again with a fresh cast' }).click()
+    await bob.getByRole('button', { name: 'Play again with a fresh cast' }).click()
+    await expect(alice.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
+    await expect(bob.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
   } finally {
-    await contextA.close()
-    await contextB.close()
+    await ca.close()
+    await cb.close()
+  }
+})
+test('Find a player matches two waiting identities without exposing the queue', async ({
+  browser,
+}) => {
+  const ca = await browser.newContext(),
+    cb = await browser.newContext(),
+    a = await ca.newPage(),
+    b = await cb.newPage()
+  try {
+    await a.goto('/')
+    await a.getByRole('button', { name: /Find a player/ }).click()
+    await a.getByLabel('What should your friend call you?').fill('Match Alice')
+    await a.getByRole('button', { name: /Find a player/ }).click()
+    await expect(a.getByRole('status')).toContainText('Looking for another player')
+    await b.goto('/')
+    await b.getByRole('button', { name: /Find a player/ }).click()
+    await b.getByLabel('What should your friend call you?').fill('Match Bob')
+    await b.getByRole('button', { name: /Find a player/ }).click()
+    await expect(a.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
+    await expect(b.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
+    expect(await a.locator('.play-room-id>b').innerText()).toBe(
+      await b.locator('.play-room-id>b').innerText(),
+    )
+    await a.getByRole('button', { name: 'Game menu', exact: true }).click()
+    await a.getByRole('button', { name: 'Leave game', exact: true }).click()
+    await a.getByRole('button', { name: 'Yes, leave game', exact: true }).click()
+    await expect(b.getByRole('heading', { name: 'Game ended.' })).toBeVisible()
+  } finally {
+    await ca.close()
+    await cb.close()
   }
 })

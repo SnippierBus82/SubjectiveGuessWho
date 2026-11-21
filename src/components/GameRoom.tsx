@@ -1,882 +1,911 @@
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   CheckCheck,
-  ChevronDown,
+  Clock3,
   Copy,
+  Expand,
   Flag,
-  HelpCircle,
   History,
   LoaderCircle,
   LockKeyhole,
   MessageCircle,
+  Menu,
   RotateCcw,
   Send,
-  Share2,
   Shuffle,
-  Sparkles,
+  Smile,
   Trophy,
   Users,
+  Volume2,
+  VolumeX,
   Wifi,
   WifiOff,
   X,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { characterById, characters } from '../game/characters'
-import { canAnswer, canAsk, characterCount, secondsRemaining, trimQuestion } from '../game/rules'
-import { REACTIONS, type RoomState } from '../game/types'
+import { characters } from '../game/legacy/characters'
+import type { Character } from '../game/characters'
+import { DEFAULT_TIMINGS, timeLabel } from '../game/timings'
+import { boardInfo } from '../game/boards'
+import { REACTIONS } from '../game/types'
 import type { GameController } from '../hooks/useGame'
-import { copyText, invitation, navigateRoom, shareRoom, storage } from '../lib/platform'
+import { copyText, invitation, storage } from '../lib/platform'
 import { CharacterBoard, Portrait } from './CharacterBoard'
 import { Logo } from './Home'
+import { LogoMark } from './LogoMark'
+import { QuestionIdeas } from './QuestionIdeas'
+import { GameRoom as LegacyGameRoom } from './LegacyGameRoom'
+import { Sheet } from './Sheet'
+import { GameMenu } from './GameMenu'
 
-function useClock() {
+function useNow() {
   const [now, setNow] = useState(Date.now())
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 200)
-    return () => clearInterval(timer)
+    const id = setInterval(() => setNow(Date.now()), 250)
+    return () => clearInterval(id)
   }, [])
   return now
 }
-function Timer({ state, offset }: { state: RoomState; offset: number }) {
-  const now = useClock()
-  const seconds = secondsRemaining(state.game.deadline, offset, now)
-  const duration = state.game.phase === 'answer' ? 15 : 30
+function Clock({ deadline, now, label }: { deadline: string | null; now: number; label: string }) {
+  const left = deadline ? Math.max(0, Math.ceil((Date.parse(deadline) - now) / 1000)) : null
   return (
-    <div
-      className={`turn-timer ${seconds <= 5 ? 'urgent' : ''}`}
+    <span
+      className={`phase-clock ${left !== null && left <= 10 ? 'clock-soon' : ''}`}
       role="timer"
-      aria-live="off"
-      aria-label={`${seconds} seconds remaining`}
+      aria-label={`${label}: ${left === null ? 'unlimited' : `${left} seconds remaining`}`}
     >
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <circle cx="24" cy="24" r="20" className="timer-track" />
-        <circle
-          cx="24"
-          cy="24"
-          r="20"
-          className="timer-progress"
-          strokeDasharray="125.66"
-          strokeDashoffset={125.66 * (1 - Math.min(1, seconds / duration))}
-        />
-      </svg>
-      <span>
-        {seconds}
-        <small>s</small>
-      </span>
-    </div>
-  )
-}
-function RulesDialog({ onClose }: { onClose: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  useEffect(() => {
-    dialog.current?.showModal()
-  }, [])
-  return (
-    <dialog
-      ref={dialog}
-      className="game-dialog rules-dialog"
-      onCancel={onClose}
-      aria-labelledby="rules-title"
-    >
-      <button className="icon-button dialog-close" onClick={onClose} aria-label="Close rules">
-        <X size={20} />
-      </button>
-      <span className="dialog-symbol">
-        <HelpCircle size={30} />
-      </span>
-      <h2 id="rules-title">Trust your gut.</h2>
-      <ol>
-        <li>Pick a secret character. Your friend picks one too.</li>
-        <li>You have 30 seconds to ask a yes-or-no question, up to 50 characters.</li>
-        <li>Your friend has 15 seconds to answer. Missed answers stay unanswered.</li>
-        <li>
-          Tap faces to eliminate them. Tap again to bring them back. Only you see your eliminations.
-        </li>
-        <li>
-          During your question turn, guess instead of asking. A correct guess wins; a wrong guess
-          loses.
-        </li>
-      </ol>
-      <button className="button primary" onClick={onClose}>
-        Got it <Check size={18} />
-      </button>
-    </dialog>
+      <Clock3 size={15} />
+      {left === null ? '∞' : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`}
+    </span>
   )
 }
 export function GameRoom({ controller }: { controller: GameController }) {
-  const state = controller.state!
-  const [showRules, setShowRules] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const [copyError, setCopyError] = useState(false)
-  const me = state.players.find((p) => p.id === state.you)!
-  const other = state.players.find((p) => p.id !== state.you)
-  const mySecret = characterById(state.myCharacter)
-  const connectionText = controller.preview
-    ? 'Local preview'
-    : controller.connection === 'online'
-      ? 'Connected'
-      : controller.connection === 'offline'
-        ? 'Offline'
-        : 'Reconnecting…'
+  const [menu, setMenu] = useState(false)
   useEffect(() => {
-    if (!copied) return
-    const timer = setTimeout(() => setCopied(false), 2500)
-    return () => clearTimeout(timer)
-  }, [copied])
-  async function copyInvite(share = false) {
-    try {
-      if (share) await shareRoom(state.code)
-      else await copyText(invitation(state.code))
-      setCopied(true)
-      setCopyError(false)
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) setCopyError(true)
-    }
-  }
+    const open = () => setMenu(true)
+    window.addEventListener('sgw:open-game-menu', open)
+    return () => window.removeEventListener('sgw:open-game-menu', open)
+  }, [])
   return (
     <>
+      {controller.state!.rulesVersion !== 2 ? (
+        <LegacyGameRoom controller={controller} onMenu={() => setMenu(true)} />
+      ) : (
+        <ModernRoom
+          key={controller.state!.game.id + controller.state!.you}
+          controller={controller}
+          onMenu={() => setMenu(true)}
+        />
+      )}
+      {menu && <GameMenu controller={controller} onClose={() => setMenu(false)} />}
+    </>
+  )
+}
+function ModernRoom({ controller, onMenu }: { controller: GameController; onMenu: () => void }) {
+  const s = controller.state!,
+    g = s.game,
+    flow = g.flow!,
+    me = s.players.find((p) => p.id === s.you)!,
+    other = s.players.find((p) => p.id !== s.you)
+  const board = s.board ?? characters,
+    settings = s.settings ?? DEFAULT_TIMINGS
+  const waitingForBoard = s.boardStatus === 'pending' || s.boardStatus === 'error'
+  const now = useNow() + controller.clockOffset
+  const key = `${s.roomId}:${g.id}:${s.you}`
+  const boardRef = useRef<HTMLDivElement>(null)
+  const boardPosition = useRef(storage.read<number>(`board-scroll:${key}`, 0))
+  const [eliminated, setEliminated] = useState<string[]>(
+    () => storage.read<unknown>(`eliminated:${key}`, []) as string[],
+  )
+  const safeEliminated = Array.isArray(eliminated)
+    ? eliminated.filter((id) => board.some((c) => c.id === id))
+    : []
+  const [draft, setDraft] = useState(() => storage.read<string>(`draft:${key}`, ''))
+  const [sheet, setSheet] = useState<'history' | 'emoji' | 'rules' | 'portrait' | 'guess' | null>(
+    null,
+  )
+  const [inspected, setInspected] = useState<Character | null>(null)
+  const [inspect, setInspect] = useState(false),
+    [guessMode, setGuessMode] = useState(false)
+  const [keyboard, setKeyboard] = useState(false)
+  const viewportSize = useRef({
+    height: window.visualViewport?.height ?? window.innerHeight,
+    width: window.innerWidth,
+  })
+  const [focused, setFocused] = useState(false),
+    [copied, setCopied] = useState(false),
+    [copyFailed, setCopyFailed] = useState(false)
+  const [saveFailed, setSaveFailed] = useState(false),
+    [cooldown, setCooldown] = useState(false)
+  const reactionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const mySecret = board.find((c) => c.id === s.myCharacter)
+  const writer = g.activePlayer === s.you
+  const canWrite = g.phase === 'question' && writer && !flow.submitted
+  const latest = [...s.history].reverse().find((q) => q.status === 'answered')
+  const pending = s.history.find((q) => q.turn === g.turn && q.status === 'pending')
+  const canAnswer = g.phase === 'answer' && !writer
+  const lobby = g.phase === 'lobby',
+    finished = g.phase === 'finished',
+    paused = g.phase === 'paused'
+  const round = Math.max(1, Math.ceil(g.turn / 2))
+  useLayoutEffect(() => {
+    if (!keyboard && boardRef.current) boardRef.current.scrollTop = boardPosition.current
+  }, [keyboard])
+  useEffect(() => () => clearTimeout(reactionTimer.current), [])
+  useEffect(() => {
+    if (!canWrite) setGuessMode(false)
+  }, [canWrite])
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    document.body.classList.add('is-playing')
+    const viewport = window.visualViewport
+    const resize = () => {
+      const height = viewport?.height ?? window.innerHeight,
+        width = window.innerWidth
+      if (width !== viewportSize.current.width) viewportSize.current = { width, height }
+      viewportSize.current.height = Math.max(viewportSize.current.height, height)
+      setKeyboard(height < viewportSize.current.height * 0.75)
+      document.documentElement.style.setProperty('--play-height', `${height}px`)
+    }
+    resize()
+    viewport?.addEventListener('resize', resize)
+    window.addEventListener('resize', resize)
+    return () => {
+      viewport?.removeEventListener('resize', resize)
+      window.removeEventListener('resize', resize)
+      document.documentElement.style.removeProperty('--play-height')
+      document.body.classList.remove('is-playing')
+    }
+  }, [])
+  function changeDraft(value: string) {
+    const text = Array.from(value.replace(/[\r\n\t]/g, ' '))
+      .slice(0, 50)
+      .join('')
+    setDraft(text)
+    if (!storage.write(`draft:${key}`, text)) setSaveFailed(true)
+  }
+  function changeEliminated(next: string[]) {
+    setEliminated(next)
+    if (!storage.write(`eliminated:${key}`, next)) setSaveFailed(true)
+  }
+  async function ask() {
+    if (await controller.act('question', { text: draft.trim() })) changeDraft('')
+  }
+  function pick(id: string) {
+    const character = board.find((c) => c.id === id)!
+    if (guessMode) {
+      setInspected(character)
+      setSheet('guess')
+      return
+    }
+    if (lobby) {
+      void controller.act('select', { characterId: id })
+      return
+    }
+    changeEliminated(
+      safeEliminated.includes(id)
+        ? safeEliminated.filter((c) => c !== id)
+        : [...safeEliminated, id],
+    )
+  }
+  async function copy() {
+    try {
+      await copyText(invitation(s.code))
+      setCopied(true)
+      setCopyFailed(false)
+    } catch {
+      setCopyFailed(true)
+    }
+  }
+  const reviewBase =
+    flow.startedAt && settings.review !== null
+      ? new Date(Date.parse(flow.startedAt) + settings.review * 1000).toISOString()
+      : null
+  const reviewClock = flow.reviewDeadline ?? reviewBase
+  const extraReview = !flow.submitted && reviewBase && now >= Date.parse(reviewBase)
+  return (
+    <div className={`play-app ${keyboard ? 'keyboard-open' : ''}`}>
       {controller.preview && (
-        <div className="preview-banner">
-          <span>
-            <strong>Local preview</strong>
-            <span className="preview-description">
-              {' '}
-              · two seats on this device. No online connection.
-            </span>
-          </span>
+        <div className="play-preview">
+          <span>Local preview</span>
           <button onClick={() => void controller.switchSeat()} disabled={controller.busy}>
             <Shuffle size={14} /> Switch seat
           </button>
         </div>
       )}
-      <header className="site-header room-header">
-        <Logo />
-        <div className="room-header-center">
-          <span className="room-label">ROOM</span>
-          <span className="room-code">{state.code}</span>
+      <header className="play-header">
+        <Logo onClick={onMenu} />
+        <div className="play-room-id">
+          <span>{s.mode === 'match' ? 'QUICK MATCH' : 'ROOM'}</span>
+          <b>{s.code}</b>
           {!controller.preview && (
             <button
               className="icon-button"
-              onClick={() => void copyInvite()}
               aria-label="Copy invitation link"
+              onClick={() => void copy()}
             >
-              {copied ? <Check size={17} /> : <Copy size={17} />}
+              {copied ? <Check size={16} /> : <Copy size={16} />}
             </button>
           )}
         </div>
-        <button
-          className="icon-button rules-button"
-          onClick={() => setShowRules(true)}
-          aria-label="How to play"
-        >
-          <HelpCircle size={22} />
+        <button className="game-menu-button" aria-label="Game menu" onClick={onMenu}>
+          <Menu size={23} />
+          <span>Menu</span>
         </button>
       </header>
-      <main
-        className={`room-main ${state.game.phase === 'lobby' ? 'is-lobby' : ''} ${state.game.phase === 'finished' ? 'is-finished' : ''}`}
-      >
-        <div className="players-strip">
-          <div
-            className={`player-pill ${state.game.activePlayer === me.id ? 'active-player' : ''}`}
-          >
-            <span className="player-avatar you-avatar">
-              {mySecret ? <Portrait character={mySecret} /> : me.name.slice(0, 1).toUpperCase()}
-            </span>
-            <span>
-              <b>
-                {me.name} <small>(you)</small>
-              </b>
-              <span className="player-subtitle">
-                {mySecret ? (
-                  <>
-                    <LockKeyhole size={11} /> Your secret: {mySecret.name}
-                  </>
-                ) : (
-                  'Pick your secret person'
-                )}
-              </span>
-            </span>
-            {me.ready && state.game.phase === 'lobby' && (
-              <CheckCheck size={18} className="ready-icon" />
-            )}
-          </div>
-          <span className="versus">vs</span>
-          <div
-            className={`player-pill opponent-pill ${state.game.activePlayer === other?.id ? 'active-player' : ''}`}
-          >
-            <span className="player-avatar friend-avatar">
-              {other ? other.name.slice(0, 1).toUpperCase() : <Users size={20} />}
-            </span>
-            <span>
-              <b>{other?.name ?? 'Your friend'}</b>
-              <span className="player-subtitle">
-                {!other ? (
-                  'Waiting to join…'
-                ) : state.game.phase === 'lobby' ? (
-                  other.ready ? (
-                    <>
-                      <Check size={12} /> Ready to go
-                    </>
-                  ) : (
-                    'Choosing a person…'
-                  )
-                ) : (
-                  <>
-                    <span
-                      className={`status-dot ${controller.onlinePlayers.includes(other.id) ? 'connected' : ''}`}
-                    />
-                    {controller.onlinePlayers.includes(other.id)
-                      ? 'Here for the judgment'
-                      : 'Reconnecting…'}
-                  </>
-                )}
-              </span>
-            </span>
-          </div>
+      <div className="play-status">
+        <div>
           <span
-            className={`connection-pill ${controller.connection === 'online' || controller.preview ? '' : 'connection-warning'}`}
-          >
-            {controller.connection === 'online' || controller.preview ? (
-              <Wifi size={13} />
-            ) : (
-              <WifiOff size={13} />
-            )}
-            {connectionText}
-          </span>
-        </div>
-        {state.game.phase === 'finished' ? (
-          <GameOver key={state.game.id + state.you} controller={controller} />
-        ) : (
-          <Round
-            key={state.game.id + state.you}
-            controller={controller}
-            copyInvite={copyInvite}
-            copied={copied}
-            copyError={copyError}
+            className={`live-dot ${controller.connection === 'online' || controller.preview ? 'is-live' : ''}`}
           />
-        )}
-        <footer className="room-footer">
-          <button onClick={() => navigateRoom()}>
-            <ArrowLeft size={13} /> Home
-          </button>
+          <b>{me.name}</b>
+          <span>vs</span>
+          <b>{other?.name ?? 'Waiting for a friend'}</b>
+        </div>
+        <span className="play-connection">
+          {controller.connection === 'online' || controller.preview ? (
+            <Wifi size={13} />
+          ) : (
+            <WifiOff size={13} />
+          )}
           <span>
-            THE ORIGINAL 24 <span aria-hidden="true">✳</span> Keep it kind. Keep it subjective.
+            {controller.preview
+              ? 'Preview'
+              : controller.connection === 'online'
+                ? 'Connected'
+                : 'Reconnecting'}
           </span>
-        </footer>
-      </main>
-      {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
-    </>
-  )
-}
-function Round({
-  controller,
-  copyInvite,
-  copied,
-  copyError,
-}: {
-  controller: GameController
-  copyInvite: (share?: boolean) => Promise<void>
-  copied: boolean
-  copyError: boolean
-}) {
-  const state = controller.state!
-  const game = state.game,
-    lobby = game.phase === 'lobby'
-  const me = state.players.find((p) => p.id === state.you)!
-  const other = state.players.find((p) => p.id !== state.you)
-  const mySecret = characterById(state.myCharacter)
-  const storageKey = `${state.roomId}:${game.id}:${state.you}`
-  const [eliminated, setEliminated] = useState<string[]>(() => {
-    const saved = storage.read<unknown>(`eliminated:${storageKey}`, [])
-    return Array.isArray(saved)
-      ? saved.filter(
-          (id): id is string => typeof id === 'string' && characters.some((c) => c.id === id),
-        )
-      : []
-  })
-  const [draft, setDraft] = useState(() => {
-    const saved = storage.read<unknown>(`draft:${storageKey}`, '')
-    return typeof saved === 'string' ? trimQuestion(saved) : ''
-  })
-  const draftRef = useRef(draft)
-  const [guessMode, setGuessMode] = useState(false)
-  const [guess, setGuess] = useState<string | null>(null)
-  const [saveError, setSaveError] = useState(false)
-  const guessAllowed = canAsk(state)
-  const displayGuessMode = guessMode && guessAllowed
-  useEffect(() => {
-    if (!guessAllowed) {
-      setGuessMode(false)
-      setGuess(null)
-    }
-  }, [guessAllowed])
-  const currentQuestion = state.history.find((q) => q.turn === game.turn && q.status === 'pending')
-  const lastQuestion = [...state.history].reverse().find((q) => q.status !== 'pending')
-  function changeDraft(text: string) {
-    const next = trimQuestion(text)
-    draftRef.current = next
-    setDraft(next)
-    if (!storage.write(`draft:${storageKey}`, next)) setSaveError(true)
-  }
-  function changeEliminated(next: string[]) {
-    setEliminated(next)
-    if (!storage.write(`eliminated:${storageKey}`, next)) setSaveError(true)
-  }
-  function pick(id: string) {
-    if (lobby) {
-      void controller.act('select', { characterId: id })
-      return
-    }
-    if (displayGuessMode) {
-      setGuess(id)
-      return
-    }
-    changeEliminated(
-      eliminated.includes(id) ? eliminated.filter((item) => item !== id) : [...eliminated, id],
-    )
-  }
-  async function sendQuestion() {
-    const sent = draft
-    const ok = await controller.act('question', { text: sent.trim() })
-    if (ok && draftRef.current === sent) changeDraft('')
-  }
-  return (
-    <div className="game-layout">
-      <section className="board-area">
-        <div className="board-heading">
-          <div>
-            <p className="eyebrow">THE ORIGINAL PACK</p>
-            <h1>
-              {lobby
-                ? 'Who’s your person?'
-                : displayGuessMode
-                  ? 'Make your call.'
-                  : 'Read the room.'}
-              <span className="heading-star" aria-hidden="true">
-                ✳
-              </span>
-            </h1>
+        </span>
+      </div>
+      {finished ? (
+        <main className="play-result">
+          <div className={`result-symbol ${g.winner === s.you ? 'won' : ''}`}>
+            {g.winner ? <Trophy size={35} /> : <Users size={35} />}
           </div>
-          {!lobby && (
-            <div className="remaining-count">
-              <strong>
-                {24 - eliminated.length}
-                <span>/ 24</span>
-              </strong>
-              <span>still in the running</span>
-            </div>
-          )}
-        </div>
-        <div className="board-toolbar">
+          <p className="eyebrow">{g.winner ? 'THAT’S A GOOD READ' : 'TAKE YOUR TIME'}</p>
+          <h1>
+            {!g.winner ? 'Game ended.' : g.winner === s.you ? 'You called it.' : 'Good game.'}
+          </h1>
           <p>
-            {lobby
-              ? 'Pick a secret character. Your friend won’t see.'
-              : displayGuessMode
-                ? 'Tap the person you think they picked.'
-                : 'Tap a face to rule them out. Tap again to undo.'}
+            {g.endReason === 'no_show'
+              ? 'The other player didn’t get ready. Find someone else to play.'
+              : !g.winner
+                ? 'This game ended without a winner.'
+                : g.result === 'correct'
+                  ? `${s.players.find((p) => p.id === g.winner)?.name} found the secret character.`
+                  : 'The final guess missed. The other player wins.'}
           </p>
-          {!lobby && (
-            <button onClick={() => changeEliminated([])} disabled={!eliminated.length}>
-              <RotateCcw size={13} /> Reset
-            </button>
-          )}
-        </div>
-        <CharacterBoard
-          mode={lobby ? 'select' : displayGuessMode ? 'guess' : 'eliminate'}
-          selected={lobby ? state.myCharacter : guess}
-          eliminated={eliminated}
-          disabled={lobby && (controller.busy || me.ready)}
-          onPick={pick}
-        />
-        {saveError && (
-          <p className="field-error" role="status">
-            This browser can’t save drafts or eliminations. Keep this tab open.
-          </p>
-        )}
-        {!lobby && (
-          <div className="board-note">
-            <LockKeyhole size={13} /> Your eliminations are just for you. No one else can see them.
+          <div className="result-cast">
+            {s.players.map((p) => {
+              const c = board.find((c) => c.id === s.reveals?.[p.id])
+              return c ? (
+                <div key={p.id}>
+                  <Portrait character={c} />
+                  <span>{p.id === s.you ? 'Your character' : `${p.name}’s character`}</span>
+                  <b>{c.name}</b>
+                </div>
+              ) : null
+            })}
           </div>
-        )}
-      </section>
-      <aside className="game-sidebar">
-        {lobby ? (
-          <section className="lobby-panel turn-panel">
-            <span className="panel-eyebrow">
-              <span className="status-dot connected" /> THE PRE-GAME
-            </span>
-            <h2>
-              {me.ready
-                ? 'Excellent choice.'
-                : mySecret
-                  ? `Hello, ${mySecret.name}.`
-                  : 'Every face has a vibe.'}
-            </h2>
-            <p className="panel-description">
-              {me.ready
-                ? other?.ready
-                  ? 'Let the questionable questions begin.'
-                  : 'Your person is locked in. Waiting for your friend.'
-                : mySecret
-                  ? 'This is your secret person. Ready to see what your friend thinks of them?'
-                  : 'Choose someone on the board. Then let your friend’s assumptions do the work.'}
-            </p>
-            <div className={`secret-preview ${mySecret ? 'has-secret' : ''}`}>
-              {mySecret ? (
-                <>
-                  <Portrait character={mySecret} />
-                  <div>
-                    <span>YOUR SECRET PERSON</span>
-                    <strong>{mySecret.name}</strong>
-                    <small>
-                      <LockKeyhole size={11} /> For your eyes only
-                    </small>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="secret-question">?</span>
-                  <span>
-                    A mysterious someone.
-                    <br />
-                    <small>They’re out there. Pick a face.</small>
-                  </span>
-                </>
+          <div className="result-actions">
+            {controller.search ? (
+              <>
+                <p role="status">Finding another player…</p>
+                <button
+                  className="button secondary"
+                  disabled={controller.busy}
+                  onClick={() => void controller.cancelSearch()}
+                >
+                  Cancel search
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="button primary"
+                  disabled={controller.busy || me.rematchReady}
+                  onClick={() => void controller.act('rematch')}
+                >
+                  <RotateCcw size={18} />
+                  {me.rematchReady
+                    ? 'Waiting for the other player…'
+                    : boardInfo(s.boardId).shuffle
+                      ? 'Play again with a fresh cast'
+                      : 'Play again with this board'}
+                </button>
+                {s.mode === 'match' && (
+                  <button
+                    className="button secondary"
+                    onClick={async () => {
+                      if (await controller.leave()) await controller.findPlayer(me.name)
+                    }}
+                  >
+                    Find another player <Users size={18} />
+                  </button>
+                )}
+              </>
+            )}
+            <button className="text-button" onClick={() => void controller.leave()}>
+              Back to Play
+            </button>
+          </div>
+        </main>
+      ) : (
+        <>
+          <section className="play-phase" aria-live="polite">
+            <div className="phase-title">
+              <div>
+                <p className="eyebrow">
+                  {lobby
+                    ? 'CHOOSE YOUR SECRET'
+                    : paused
+                      ? 'A MOMENT TO RECONNECT'
+                      : `ROUND ${round} · QUESTION ${g.turn % 2 === 1 ? '1' : '2'} OF 2`}
+                </p>
+                <h1>
+                  {lobby
+                    ? waitingForBoard
+                      ? 'Preparing your faces.'
+                      : 'Pick your person.'
+                    : paused
+                      ? 'Let’s pause here.'
+                      : g.phase === 'answer'
+                        ? canAnswer
+                          ? 'Your answer.'
+                          : 'Their answer.'
+                        : writer
+                          ? flow.submitted
+                            ? 'Question ready.'
+                            : 'Your next good question.'
+                          : flow.reviewReady
+                            ? 'You’re ready.'
+                            : 'Make your eliminations.'}
+                </h1>
+              </div>
+              {(g.phase === 'answer' || (lobby && s.mode === 'match')) && (
+                <Clock
+                  deadline={g.deadline}
+                  now={now}
+                  label={lobby ? 'Character selection time' : 'Answer time'}
+                />
               )}
             </div>
-            <button
-              className="button primary"
-              disabled={!mySecret || controller.busy}
-              onClick={() => void controller.act(me.ready ? 'unready' : 'ready')}
-            >
-              {controller.busy ? (
-                <LoaderCircle className="spin" size={18} />
-              ) : me.ready ? (
-                <RotateCcw size={18} />
-              ) : (
-                <Check size={18} />
-              )}
-              {me.ready ? 'Change my person' : 'I’m ready'}
-              {!me.ready && <ArrowRight size={18} />}
-            </button>
-            {controller.preview && (
-              <p className="local-seat-hint">
-                <Shuffle size={14} /> Ready? Use <b>Switch seat</b> above to pick for the other
-                player.
+            {g.phase === 'question' && (
+              <div className="activity-pair">
+                <div className={`activity-chip ${writer ? 'your-activity' : ''}`}>
+                  <span>
+                    {writer ? 'You' : other?.name} · {flow.submitted ? 'submitted' : 'writing'}
+                  </span>
+                  {flow.submitted ? (
+                    <CheckCheck size={18} />
+                  ) : (
+                    <Clock deadline={flow.writingDeadline} now={now} label="Writing time" />
+                  )}
+                </div>
+                <div className={`activity-chip ${!writer ? 'your-activity' : ''}`}>
+                  <span>
+                    {!writer ? 'You' : other?.name} · {flow.reviewReady ? 'ready' : 'reviewing'}
+                  </span>
+                  {flow.reviewReady ? (
+                    <CheckCheck size={18} />
+                  ) : extraReview ? (
+                    <small>Extra review</small>
+                  ) : (
+                    <Clock deadline={reviewClock} now={now} label="Review time" />
+                  )}
+                </div>
+              </div>
+            )}
+            {lobby && (
+              <p className="phase-guidance">
+                {s.mode === 'match'
+                  ? 'You’ve been paired. Pick a secret and get ready within two minutes.'
+                  : 'Your choice stays secret until the game ends.'}
               </p>
             )}
-            {!other && (
-              <div className="invite-section">
-                <div className="invite-heading">
-                  <Users size={16} />
-                  <b>Bring your other half.</b>
-                </div>
-                <p>Send a friend your invitation or this room code.</p>
-                <div className="invite-code">{state.code}</div>
-                <div className="invite-actions">
-                  <button className="button secondary" onClick={() => void copyInvite()}>
-                    {copied ? <Check size={16} /> : <Copy size={16} />}
-                    {copied ? 'Copied!' : 'Copy link'}
+          </section>
+          <div className="play-workspace">
+            <section className="play-board" aria-label="Character board">
+              <div className="play-board-tools">
+                <span>
+                  {lobby ? 'Tap a face to choose' : `${24 - safeEliminated.length} of 24 remaining`}
+                </span>
+                <div>
+                  <button
+                    className={inspect ? 'selected-tool' : ''}
+                    aria-pressed={inspect}
+                    onClick={() => setInspect((v) => !v)}
+                  >
+                    <Expand size={14} />
+                    {inspect ? 'Inspecting' : 'Inspect'}
                   </button>
-                  {typeof navigator.share === 'function' && (
+                  {!lobby && (
                     <button
-                      className="icon-button share-button"
-                      onClick={() => void copyInvite(true)}
-                      aria-label="Share invitation"
+                      aria-label="Reset eliminations"
+                      disabled={!safeEliminated.length}
+                      onClick={() => changeEliminated([])}
                     >
-                      <Share2 size={18} />
+                      <RotateCcw size={15} />
                     </button>
                   )}
                 </div>
-                {copyError && (
-                  <p className="field-error">Copy unavailable. Share the room code instead.</p>
-                )}
               </div>
-            )}
-            {other && (
-              <div className="lobby-friend">
-                <span className={`status-dot ${other.ready ? 'connected' : ''}`} />
-                <span>
-                  {other.name} is {other.ready ? 'ready to play' : 'choosing a person'}.
-                </span>
-              </div>
-            )}
-          </section>
-        ) : (
-          <section className={`turn-panel ${canAsk(state) || canAnswer(state) ? 'your-turn' : ''}`}>
-            <div className="turn-panel-top">
-              <span className="panel-eyebrow">
-                ROUND {game.turn}
-                <span className="turn-dot">·</span>
-                {canAsk(state) ? 'YOUR QUESTION' : canAnswer(state) ? 'YOUR ANSWER' : 'THEIR TURN'}
-              </span>
-              <Timer state={state} offset={controller.clockOffset} />
-            </div>
-            <h2>
-              {canAsk(state)
-                ? 'Go on. Judge a little.'
-                : canAnswer(state)
-                  ? 'What do you reckon?'
-                  : game.phase === 'answer'
-                    ? 'Let them think…'
-                    : `${other?.name ?? 'Your friend'} is thinking…`}
-            </h2>
-            {currentQuestion ? (
-              <div className="current-question">
-                <MessageCircle size={20} />
-                <p>“{currentQuestion.text}”</p>
-              </div>
-            ) : (
-              <p className="panel-description">
-                {canAsk(state)
-                  ? 'Ask a yes-or-no question about their secret person.'
-                  : 'Draft your next question while they make their assumptions.'}
-              </p>
-            )}
-            {canAnswer(state) && (
-              <div className="answer-buttons">
-                <button
-                  className="button yes-button"
-                  disabled={controller.busy}
-                  onClick={() => void controller.act('answer', { answer: true })}
-                >
-                  <Check size={23} /> YES
-                </button>
-                <button
-                  className="button no-button"
-                  disabled={controller.busy}
-                  onClick={() => void controller.act('answer', { answer: false })}
-                >
-                  <X size={23} /> NO
-                </button>
-              </div>
-            )}
-            {game.phase === 'answer' && !canAnswer(state) && (
-              <div className="waiting-answer">
-                <span className="thinking-dots">
-                  <i />
-                  <i />
-                  <i />
-                </span>{' '}
-                Waiting for {other?.name ?? 'your friend'}’s verdict
-              </div>
-            )}
-            {
-              <form
-                className="question-form"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  if (canAsk(state) && draft.trim()) void sendQuestion()
+              <div
+                className="play-board-scroll"
+                ref={boardRef}
+                onScroll={(e) => {
+                  if (!keyboard) {
+                    boardPosition.current = e.currentTarget.scrollTop
+                    storage.write(`board-scroll:${key}`, boardPosition.current)
+                  }
                 }}
               >
-                <div className="question-label">
-                  <label htmlFor="question-input">
-                    {canAsk(state) ? 'YOUR QUESTION' : 'YOUR NEXT QUESTION'}
-                  </label>
-                  <span className={characterCount(draft) >= 45 ? 'near-limit' : ''}>
-                    {characterCount(draft)} / 50
-                  </span>
-                </div>
-                <div className="question-input-wrap">
-                  <textarea
-                    id="question-input"
-                    placeholder="Would they start a podcast?"
-                    rows={2}
-                    value={draft}
-                    onChange={(event) => changeDraft(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (
-                        event.key === 'Enter' &&
-                        !event.shiftKey &&
-                        !event.nativeEvent.isComposing
-                      ) {
-                        event.preventDefault()
-                        if (canAsk(state) && draft.trim() && !controller.busy) void sendQuestion()
-                      }
-                    }}
-                    aria-describedby="draft-hint"
-                  />
-                  <button
-                    className="send-button"
-                    type="submit"
-                    aria-label="Ask question"
-                    disabled={!canAsk(state) || !draft.trim() || controller.busy}
-                  >
-                    <Send size={18} />
-                  </button>
-                </div>
-                <span className="draft-hint" id="draft-hint">
-                  {canAsk(state)
-                    ? 'Go with your gut. You have 30 seconds.'
-                    : 'Your draft stays here until you send it.'}
-                </span>
-              </form>
-            }
-            {canAsk(state) && (
-              <button
-                className={`button guess-button ${displayGuessMode ? 'guess-active' : ''}`}
-                onClick={() => setGuessMode((value) => !value)}
-                disabled={controller.busy}
-              >
-                <Flag size={17} />
-                {displayGuessMode ? 'Cancel final guess' : 'I know who it is'}
-                {!displayGuessMode && <ArrowRight size={16} />}
-              </button>
-            )}
-            {lastQuestion && game.phase === 'question' && (
-              <div className="last-answer">
-                <span>LAST VERDICT</span>
-                <span
-                  className={`answer-badge ${lastQuestion.status === 'unanswered' ? 'unanswered' : lastQuestion.answer ? 'yes' : 'no'}`}
-                >
-                  {lastQuestion.status === 'unanswered'
-                    ? 'No answer'
-                    : lastQuestion.answer
-                      ? 'YES'
-                      : 'NO'}
-                </span>
-                <p>“{lastQuestion.text}”</p>
+                <CharacterBoard
+                  board={board}
+                  inspect={inspect}
+                  onInspect={(id) => {
+                    setInspected(board.find((c) => c.id === id)!)
+                    setSheet('portrait')
+                  }}
+                  mode={lobby ? 'select' : guessMode ? 'guess' : 'eliminate'}
+                  selected={lobby ? s.myCharacter : null}
+                  eliminated={safeEliminated}
+                  disabled={lobby && (controller.busy || me.ready || waitingForBoard)}
+                  onPick={pick}
+                />
               </div>
-            )}
-          </section>
-        )}
-        <ReactionBar controller={controller} />
-        {!lobby && (
-          <details className="history-panel" open>
-            <summary>
-              <span>
-                <History size={16} /> The paper trail{' '}
-                <span className="history-count">{state.history.length}</span>
-              </span>
-              <ChevronDown size={15} />
-            </summary>
-            <div className="history-entries">
-              {state.history.length ? (
-                [...state.history].reverse().map((q) => (
-                  <div className="history-entry" key={q.id}>
-                    <div>
-                      <span>
-                        {q.asker === state.you ? 'YOU' : (other?.name.toUpperCase() ?? 'THEM')}{' '}
-                        <small>· {q.turn}</small>
-                      </span>
-                      <span
-                        className={`answer-badge ${q.status === 'pending' ? 'pending' : q.status === 'unanswered' ? 'unanswered' : q.answer ? 'yes' : 'no'}`}
-                      >
-                        {q.status === 'pending'
-                          ? 'Thinking…'
-                          : q.status === 'unanswered'
-                            ? 'No answer'
-                            : q.answer
-                              ? 'YES'
-                              : 'NO'}
-                      </span>
-                    </div>
-                    <p>{q.text}</p>
-                  </div>
-                ))
-              ) : (
-                <div className="history-empty">
-                  <MessageCircle size={20} />
+            </section>
+            <section className="play-action" aria-label="Current activity">
+              {waitingForBoard && lobby ? (
+                <div className="board-preparing" role="status">
+                  <LogoMark />
+                  <h2>
+                    {s.boardStatus === 'error' || controller.boardPreparationError
+                      ? 'Let’s try those faces again.'
+                      : 'Preparing faces…'}
+                  </h2>
                   <p>
-                    No assumptions on record.
-                    <br />
-                    Yet.
+                    {controller.boardPreparationError ||
+                      s.boardError ||
+                      'Getting the same 24 faces for both players.'}
                   </p>
+                  {(s.boardStatus === 'error' || controller.boardPreparationError) && (
+                    <button
+                      className="button primary"
+                      disabled={controller.preparingBoard}
+                      onClick={() => void controller.prepareBoard()}
+                    >
+                      Retry preparing faces
+                    </button>
+                  )}
                 </div>
+              ) : paused ? (
+                <div className="paused-activity">
+                  <div className="pause-icon">
+                    <Clock3 size={26} />
+                  </div>
+                  <h2>
+                    {g.pause?.reason === 'disconnect'
+                      ? 'Waiting for a player to return.'
+                      : 'Time ran out. No rush.'}
+                  </h2>
+                  <p>
+                    {g.pause?.missing === s.you
+                      ? 'Let the other player know you’re back.'
+                      : `${s.players.find((p) => p.id === g.pause?.missing)?.name ?? 'The other player'} may need a moment.`}{' '}
+                    Your board and question are saved.
+                  </p>
+                  {pending && <blockquote className="paused-question">“{pending.text}”</blockquote>}
+                  <button
+                    className="button primary"
+                    disabled={controller.busy || g.pause?.resumeReady.includes(s.you)}
+                    onClick={() => void controller.act('resume')}
+                  >
+                    {g.pause?.resumeReady.includes(s.you)
+                      ? 'Waiting for the other player…'
+                      : 'I’m back · ready to continue'}
+                  </button>
+                  {g.pause && now - Date.parse(g.pause.since) >= 120000 ? (
+                    <>
+                      <p>You can keep waiting or end without a winner.</p>
+                      <button
+                        className="button secondary"
+                        onClick={() => void controller.act('end')}
+                      >
+                        End game without a winner
+                      </button>
+                    </>
+                  ) : (
+                    <p className="pause-grace">
+                      You can end without a winner after the two-minute return window.
+                    </p>
+                  )}
+                </div>
+              ) : lobby ? (
+                <>
+                  <div className="picked-secret">
+                    {mySecret ? (
+                      <>
+                        <Portrait character={mySecret} />
+                        <div>
+                          <span>
+                            <LockKeyhole size={12} /> YOUR SECRET
+                          </span>
+                          <h2>{mySecret.name}</h2>
+                          <p>Only you can see your choice.</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="empty-secret">?</span>
+                        <div>
+                          <h2>Who’s your secret?</h2>
+                          <p>Tap a face above.</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <button
+                    className="button primary"
+                    disabled={!mySecret || controller.busy}
+                    onClick={() => void controller.act(me.ready ? 'unready' : 'ready')}
+                  >
+                    <Check size={18} />
+                    {me.ready ? 'Change my person' : 'I’m ready'}
+                  </button>
+                  <p className="ready-status" role="status">
+                    {other
+                      ? `${other.name} is ${other.ready ? 'ready' : 'choosing a character'}.`
+                      : 'Invite a friend to choose their secret.'}
+                  </p>
+                  {!other && !controller.preview && (
+                    <div className="lobby-invite">
+                      <b>{s.code}</b>
+                      <button className="button secondary" onClick={() => void copy()}>
+                        <Copy size={16} />
+                        {copied ? 'Copied!' : 'Copy invitation'}
+                      </button>
+                      {copyFailed && <p>Copy unavailable. Share the room code above.</p>}
+                    </div>
+                  )}
+                  {s.boardSource === 'cache' && (
+                    <p className="cache-note">Playing with saved faces.</p>
+                  )}
+                </>
+              ) : g.phase === 'answer' ? (
+                <>
+                  <div className="answer-activity">
+                    {canAnswer && mySecret && (
+                      <button
+                        className="answer-secret"
+                        aria-label={`Enlarge your secret ${mySecret.name}`}
+                        onClick={() => {
+                          setInspected(mySecret)
+                          setSheet('portrait')
+                        }}
+                      >
+                        <Portrait character={mySecret} />
+                        <span>
+                          <LockKeyhole size={11} /> {mySecret.name}
+                        </span>
+                      </button>
+                    )}
+                    <div>
+                      <p className="eyebrow">
+                        {canAnswer ? 'ANSWER ABOUT YOUR SECRET' : 'YOUR QUESTION'}
+                      </p>
+                      <h2 className="asked-question">“{pending?.text}”</h2>
+                      {!canAnswer && (
+                        <p className="phase-guidance">
+                          {other?.name} is thinking. Your board is still yours to edit.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {canAnswer ? (
+                    <div className="play-answer-buttons">
+                      <button
+                        className="button yes-button"
+                        disabled={controller.busy}
+                        onClick={() => void controller.act('answer', { answer: true })}
+                      >
+                        <Check size={22} /> YES
+                      </button>
+                      <button
+                        className="button no-button"
+                        disabled={controller.busy}
+                        onClick={() => void controller.act('answer', { answer: false })}
+                      >
+                        <X size={22} /> NO
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="waiting-verdict">
+                      <LoaderCircle size={16} className="spin" /> Waiting for {other?.name}’s answer
+                    </p>
+                  )}
+                </>
+              ) : writer ? (
+                <>
+                  {flow.submitted ? (
+                    <div className="submitted-question">
+                      <CheckCheck size={24} />
+                      <h2>Ready when they are.</h2>
+                      <p>“{flow.ownSubmission}”</p>
+                      <small>
+                        {flow.reviewReady
+                          ? 'Starting the answer step…'
+                          : `${other?.name} is finishing their eliminations.`}
+                      </small>
+                    </div>
+                  ) : (
+                    <>
+                      <QuestionIdeas focused={focused} onUse={changeDraft} />
+                      <form
+                        className="play-composer"
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          if (draft.trim() && !controller.busy) void ask()
+                        }}
+                      >
+                        <label htmlFor="question-input">
+                          Your question <span>{Array.from(draft).length}/50</span>
+                        </label>
+                        <div>
+                          <textarea
+                            id="question-input"
+                            aria-label="Your question"
+                            placeholder="Ask about their secret person…"
+                            rows={2}
+                            value={draft}
+                            onFocus={() => setFocused(true)}
+                            onBlur={() => setFocused(false)}
+                            onChange={(e) => changeDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                                e.preventDefault()
+                                if (draft.trim() && !controller.busy) void ask()
+                              }
+                            }}
+                          />
+                          <button
+                            className="send-button"
+                            type="submit"
+                            aria-label="Ask question"
+                            disabled={!draft.trim() || controller.busy}
+                          >
+                            <Send size={19} />
+                          </button>
+                        </div>
+                      </form>
+                      <button
+                        className={`guess-link ${guessMode ? 'guess-on' : ''}`}
+                        onClick={() => {
+                          setInspect(false)
+                          setGuessMode((v) => !v)
+                        }}
+                      >
+                        <Flag size={16} />
+                        {guessMode ? 'Cancel final guess · choose on board' : 'I know who it is'}
+                        <ArrowRight size={15} />
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  {latest ? (
+                    <div className="review-verdict">
+                      <span className={`verdict-badge ${latest.answer ? 'yes' : 'no'}`}>
+                        {latest.answer ? 'YES' : 'NO'}
+                      </span>
+                      <div>
+                        <p>“{latest.text}”</p>
+                        <small>{other?.name}’s answer · review your board</small>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="review-verdict">
+                      <MessageCircle size={24} />
+                      <p>{other?.name} is writing the first question. Explore the cast.</p>
+                    </div>
+                  )}
+                  <p className="review-instructions">
+                    {flow.reviewReady
+                      ? `You’re ready. Waiting for ${other?.name}’s question.`
+                      : extraReview
+                        ? `Keep reviewing while ${other?.name} finishes writing.`
+                        : 'Tap characters to rule them out. Your eliminations stay private.'}
+                  </p>
+                  {!flow.reviewReady && (
+                    <button
+                      className="button primary"
+                      disabled={controller.busy}
+                      onClick={() => void controller.act('review')}
+                    >
+                      <CheckCheck size={18} /> Done reviewing
+                    </button>
+                  )}
+                </>
               )}
-            </div>
-          </details>
-        )}
-        <div className="sidebar-signoff">
-          Good friends. Questionable instincts.
-          <Sparkles size={16} />
-        </div>
-      </aside>
-      {guess && displayGuessMode && (
-        <GuessDialog
-          id={guess}
-          busy={controller.busy}
-          onCancel={() => setGuess(null)}
-          onConfirm={async () => {
-            if (await controller.act('guess', { characterId: guess })) {
-              setGuess(null)
-              setGuessMode(false)
-            }
-          }}
-        />
+              {saveFailed && (
+                <p className="field-error" role="status">
+                  This browser can’t save drafts or eliminations. Keep this tab open.
+                </p>
+              )}
+            </section>
+          </div>
+        </>
       )}
-    </div>
-  )
-}
-function ReactionBar({ controller }: { controller: GameController }) {
-  const [cooldown, setCooldown] = useState(false)
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  useEffect(() => () => clearTimeout(timer.current), [])
-  const state = controller.state!
-  function send(emoji: string) {
-    if (cooldown) return
-    setCooldown(true)
-    void controller.react(emoji)
-    timer.current = setTimeout(() => setCooldown(false), 1250)
-  }
-  return (
-    <section className="reaction-panel">
-      <span className="eyebrow">A FACE SAYS A THOUSAND WORDS.</span>
-      <div className="reaction-stage" role="log" aria-live="polite" aria-label="Reactions">
-        {controller.reactions.map((reaction, i) => (
+      <nav className="play-nav" aria-label="Game tools">
+        <button onClick={onMenu}>
+          <Menu size={22} />
+          <span>Menu</span>
+        </button>
+        <button onClick={() => setSheet('history')}>
+          <History size={19} />
+          <span>
+            History <small>{s.history.length}</small>
+          </span>
+        </button>
+        <button className="emoji-trigger" onClick={() => setSheet('emoji')}>
+          <Smile size={21} />
+          <span>Emoji</span>
+        </button>
+        <button
+          aria-pressed={controller.mutedReactions}
+          onClick={() => controller.muteReactions(!controller.mutedReactions)}
+        >
+          {controller.mutedReactions ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          <span>{controller.mutedReactions ? 'Unmute' : 'Mute'} reactions</span>
+        </button>
+      </nav>
+      <div className="play-reactions" role="log" aria-live="polite" aria-label="Reactions">
+        {controller.reactions.map((r, i) => (
           <span
-            key={reaction.id}
+            className="reaction-float"
+            key={r.id}
             role="img"
-            className="floating-reaction"
-            style={{ '--drift': `${i * 24 - 36}px` } as React.CSSProperties}
-            aria-label={`${reaction.from === state.you ? 'You' : (state.players.find((p) => p.id === reaction.from)?.name ?? 'Your friend')} reacted ${reaction.emoji}`}
+            aria-label={`${r.from === s.you ? 'You' : other?.name} reacted ${r.emoji}`}
+            style={
+              {
+                '--reaction-x': `${12 + ((i * 23 + (Number.parseInt(r.id.slice(0, 2), 16) % 25)) % 74)}%`,
+                '--reaction-drift': `${i % 2 ? 35 : -35}px`,
+                '--reaction-rotate': `${i % 2 ? 16 : -16}deg`,
+              } as CSSProperties
+            }
           >
-            {reaction.emoji}
+            {r.emoji}
           </span>
         ))}
       </div>
-      <div className="reaction-buttons">
-        {REACTIONS.map((emoji) => (
-          <button
-            key={emoji}
-            aria-label={`React ${emoji}`}
-            onClick={() => send(emoji)}
-            disabled={cooldown || (controller.connection !== 'online' && !controller.preview)}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
-    </section>
-  )
-}
-function GuessDialog({
-  id,
-  busy,
-  onCancel,
-  onConfirm,
-}: {
-  id: string
-  busy: boolean
-  onCancel: () => void
-  onConfirm: () => Promise<void>
-}) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  const character = characterById(id)!
-  useEffect(() => {
-    dialog.current?.showModal()
-  }, [])
-  return (
-    <dialog
-      ref={dialog}
-      className="game-dialog guess-dialog"
-      onCancel={(event) => {
-        if (busy) event.preventDefault()
-        else onCancel()
-      }}
-      aria-labelledby="guess-title"
-    >
-      <span className="eyebrow">ONE FACE. ONE FINAL CALL.</span>
-      <div className="guess-portrait">
-        <Portrait character={character} />
-      </div>
-      <h2 id="guess-title">Is it {character.name}?</h2>
-      <p>
-        A correct guess wins the game.
-        <br />
-        Get it wrong and your friend wins.
-      </p>
-      <button className="button primary" disabled={busy} onClick={() => void onConfirm()}>
-        <Flag size={17} />
-        {busy ? 'Making the call…' : 'That’s my final guess'}
-      </button>
-      <button className="button text-button" disabled={busy} onClick={onCancel}>
-        I’m still thinking
-      </button>
-    </dialog>
-  )
-}
-function GameOver({ controller }: { controller: GameController }) {
-  const state = controller.state!
-  const me = state.players.find((p) => p.id === state.you)!,
-    other = state.players.find((p) => p.id !== state.you)!
-  const won = state.game.winner === state.you,
-    winner = state.players.find((p) => p.id === state.game.winner)!
-  const guesser = state.players.find((p) => p.id === state.game.guesser)!
-  const guessedCharacter = characterById(state.game.guessCharacter)!
-  return (
-    <section className={`game-over ${won ? 'won' : ''}`}>
-      <div className="confetti" aria-hidden="true">
-        {Array.from({ length: 18 }, (_, i) => (
-          <i key={i} style={{ '--i': i } as React.CSSProperties} />
-        ))}
-      </div>
-      <span className="victory-symbol">
-        <Trophy size={38} />
-      </span>
-      <p className="eyebrow">
-        {won ? 'IMMACULATE INSTINCTS.' : 'A RESPECTABLE AMOUNT OF JUDGMENT.'}
-      </p>
-      <h1>{won ? 'You know the type.' : `${winner.name} knows the type.`}</h1>
-      <p className="result-description">
-        {guesser.id === state.you ? 'You' : guesser.name} guessed {guessedCharacter.name}.{' '}
-        {state.game.result === 'correct'
-          ? 'Absolutely spot on.'
-          : 'A bold guess. A different person.'}
-        <br />
-        <strong>{won ? 'The glory is all yours.' : 'There’s always the next round.'}</strong>
-      </p>
-      <div className="revealed-characters">
-        {[me, other].map((player) => {
-          const character = characterById(state.reveals?.[player.id])
-          return (
-            character && (
-              <div className="reveal-card" key={player.id}>
-                <div className="reveal-portrait">
-                  <Portrait character={character} />
-                  {player.id === state.game.winner && (
-                    <span className="reveal-crown">
-                      <Trophy size={18} />
+      {sheet === 'rules' && (
+        <Sheet title="Read the person. Trust your gut." onClose={() => setSheet(null)}>
+          <ol className="play-rules">
+            <li>Choose your secret. The other player can’t see it.</li>
+            <li>Each round includes one question from each player.</li>
+            <li>
+              Writing and reviewing happen together. Submit your question to mark yourself ready;
+              press Done reviewing when your board is ready.
+            </li>
+            <li>
+              After submission, review ends at the later of the base review time or 20 seconds after
+              submission, within the writing limit. Unlimited review ends manually.
+            </li>
+            <li>Answer YES or NO about your own secret. You’ll see their portrait again.</li>
+            <li>
+              A missed writing or answer timer pauses the game. Both players must be ready to
+              resume.
+            </li>
+            <li>A correct final guess wins. A wrong guess loses.</li>
+          </ol>
+          <p className="lobby-timings">
+            {boardInfo(s.boardId).name} · Writing {timeLabel(settings.question)} · Answering{' '}
+            {timeLabel(settings.answer)} · Review {timeLabel(settings.review)}
+          </p>
+        </Sheet>
+      )}
+      {sheet === 'history' && (
+        <Sheet title="The conversation" onClose={() => setSheet(null)}>
+          <div className="play-history">
+            {s.history.length ? (
+              [...s.history].reverse().map((q) => (
+                <article key={q.id}>
+                  <div>
+                    <small>
+                      ROUND {Math.ceil(q.turn / 2)} · {q.asker === s.you ? 'You' : other?.name}{' '}
+                      asked
+                    </small>
+                    <span
+                      className={`verdict-badge ${q.status === 'answered' ? (q.answer ? 'yes' : 'no') : 'pending'}`}
+                    >
+                      {q.status === 'answered'
+                        ? q.answer
+                          ? 'YES'
+                          : 'NO'
+                        : q.status === 'pending'
+                          ? finished
+                            ? 'Not answered'
+                            : 'Pending'
+                          : 'Unanswered'}
                     </span>
-                  )}
-                </div>
-                <span>
-                  {player.id === state.you
-                    ? 'YOUR PERSON'
-                    : `${player.name.toUpperCase()}’S PERSON`}
-                </span>
-                <h2>{character.name}</h2>
-              </div>
-            )
-          )
-        })}
-        <span className="reveal-plus" aria-hidden="true">
-          &
-        </span>
-      </div>
-      <div className="rematch-controls">
-        <button
-          className="button primary"
-          disabled={controller.busy || me.rematchReady}
-          onClick={() => void controller.act('rematch')}
+                  </div>
+                  <p>{q.text}</p>
+                </article>
+              ))
+            ) : (
+              <p>Questions and answers will appear here.</p>
+            )}
+          </div>
+        </Sheet>
+      )}
+      {sheet === 'emoji' && (
+        <Sheet title="Send a little feeling." onClose={() => setSheet(null)}>
+          <div className="emoji-picker">
+            {REACTIONS.map((emoji) => (
+              <button
+                key={emoji}
+                aria-label={`React ${emoji}`}
+                disabled={cooldown || (!controller.preview && controller.connection !== 'online')}
+                onClick={() => {
+                  setCooldown(true)
+                  void controller.react(emoji)
+                  setSheet(null)
+                  reactionTimer.current = setTimeout(() => setCooldown(false), 1000)
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <button
+            className="mute-choice"
+            aria-pressed={controller.mutedReactions}
+            onClick={() => controller.muteReactions(!controller.mutedReactions)}
+          >
+            {controller.mutedReactions ? <VolumeX size={19} /> : <Volume2 size={19} />}{' '}
+            {controller.mutedReactions
+              ? 'Opponent reactions muted · tap to unmute'
+              : 'Mute opponent reactions'}
+          </button>
+        </Sheet>
+      )}
+      {(sheet === 'portrait' || sheet === 'guess') && inspected && (
+        <Sheet
+          title={sheet === 'guess' ? `Is it ${inspected.name}?` : inspected.name}
+          onClose={() => setSheet(null)}
         >
-          <RotateCcw size={19} />
-          {me.rematchReady ? 'Waiting for your friend…' : 'One more round?'}
-          <ArrowRight size={19} />
-        </button>
-        {other.rematchReady && !me.rematchReady && (
-          <p className="rematch-note">{other.name} is up for another round!</p>
-        )}
-        {controller.preview && me.rematchReady && (
-          <p className="rematch-note">Switch seats above to accept the rematch.</p>
-        )}
-        <button className="button text-button" onClick={() => navigateRoom()}>
-          Back to home
-        </button>
-      </div>
-      <ReactionBar controller={controller} />
-    </section>
+          <div className="inspected-portrait" style={{ background: inspected.color }}>
+            <Portrait character={inspected} />
+          </div>
+          {sheet === 'guess' ? (
+            <>
+              <p className="guess-warning">
+                A correct guess wins. A wrong guess gives the other player the win.
+              </p>
+              <button
+                className="button primary"
+                disabled={controller.busy || !canWrite}
+                onClick={async () => {
+                  if (await controller.act('guess', { characterId: inspected.id })) {
+                    setSheet(null)
+                    setGuessMode(false)
+                  }
+                }}
+              >
+                Confirm final guess <Flag size={18} />
+              </button>
+            </>
+          ) : (
+            <p className="portrait-caption">
+              {inspected.id === s.myCharacter
+                ? 'Your secret · only you can see this choice.'
+                : 'Look closely. Everyone has their own story.'}
+            </p>
+          )}
+        </Sheet>
+      )}
+    </div>
   )
 }

@@ -1,4 +1,6 @@
 node_modules/
+.generated/
+public/social-preview.png
 dist/
 .env
 .env.*

@@ -19,9 +19,10 @@ for (const provider of ['hcaptcha', 'turnstile']) {
         })}`,
       }),
     )
-    const scriptUrl = provider === 'hcaptcha'
-      ? 'https://js.hcaptcha.com/1/api.js*'
-      : 'https://challenges.cloudflare.com/turnstile/v0/api.js*'
+    const scriptUrl =
+      provider === 'hcaptcha'
+        ? 'https://js.hcaptcha.com/1/api.js*'
+        : 'https://challenges.cloudflare.com/turnstile/v0/api.js*'
     await page.route(scriptUrl, (route) =>
       route.fulfill({
         contentType: 'application/javascript',
@@ -42,6 +43,7 @@ for (const provider of ['hcaptcha', 'turnstile']) {
       }),
     )
     await page.goto('/')
+    await page.getByRole('button', { name: 'Create game', exact: true }).click()
     await expect(page.getByText(`${provider} challenge`, { exact: true })).toBeVisible()
     const create = page.getByRole('button', { name: 'Create game' })
     await expect(create).toBeDisabled()
@@ -57,5 +59,13 @@ for (const provider of ['hcaptcha', 'turnstile']) {
     await page.evaluate(() => window.dispatchEvent(new Event('captcha-test-callback')))
     await expect(create).toBeEnabled()
     await expect(page.getByRole('alert')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
+    const account = page.getByRole('button', { name: 'Create account', exact: true })
+    await expect(account).toBeDisabled()
+    await page.evaluate(() => window.dispatchEvent(new Event('captcha-test-callback')))
+    await expect(account).toBeEnabled()
+    await page.evaluate(() => window.dispatchEvent(new Event('captcha-test-expired-callback')))
+    await expect(account).toBeDisabled()
   })
 }

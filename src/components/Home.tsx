@@ -1,32 +1,42 @@
+import { useEffect, useState } from 'react'
 import {
-  ArrowRight,
-  ArrowUpRight,
   Check,
-  Heart,
+  ChevronLeft,
+  Gamepad2,
+  HelpCircle,
+  Layers3,
   Link,
-  MessageCircle,
-  MousePointer2,
   Plus,
-  Sparkles,
+  Settings2,
+  Shuffle,
+  UserRound,
   Users,
 } from 'lucide-react'
-import { useState } from 'react'
 import { config } from '../lib/config'
-import { navigateRoom, storage } from '../lib/platform'
+import { navigatePage, navigateRoom, storage, type AppPage } from '../lib/platform'
+import { useProfile } from '../hooks/useProfile'
 import type { GameController } from '../hooks/useGame'
-import { characters } from '../game/characters'
+import { DEFAULT_TIMINGS } from '../game/timings'
+import { boardInfo, previewBoard } from '../game/boards'
+import { LogoMark } from './LogoMark'
 import { Portrait } from './CharacterBoard'
+import { RoomSettings } from './RoomSettings'
+import { BoardPicker } from './BoardPicker'
+import { BoardCollection } from './BoardCollection'
+import { ProfilePage } from './ProfilePage'
+import { Sheet } from './Sheet'
 import { Captcha } from './Captcha'
+export { Privacy } from './Privacy'
 
 export function Logo({ onClick }: { onClick?: () => void }) {
   return (
     <button
       className="brand"
-      onClick={onClick ?? (() => navigateRoom())}
+      onClick={onClick ?? (() => navigatePage('play'))}
       aria-label="Subjective Guess Who home"
     >
       <span className="brand-icon" aria-hidden="true">
-        ?
+        <LogoMark />
       </span>
       <span>
         subjective
@@ -37,287 +47,413 @@ export function Logo({ onClick }: { onClick?: () => void }) {
     </button>
   )
 }
-export function Home({ controller, joinCode }: { controller: GameController; joinCode: string }) {
-  const [name, setName] = useState(() => storage.read<string>('nickname', ''))
+
+export function Home({
+  controller,
+  joinCode,
+  page,
+}: {
+  controller: GameController
+  joinCode: string
+  page: AppPage
+}) {
+  const account = useProfile()
+  const { profile } = account
+  const [name, setName] = useState(profile.name)
   const [code, setCode] = useState(joinCode)
-  const [joining, setJoining] = useState(Boolean(joinCode))
   const [token, setToken] = useState('')
   const [captchaAttempt, setCaptchaAttempt] = useState(0)
+  const [settings, setSettings] = useState(DEFAULT_TIMINGS)
+  const [help, setHelp] = useState(false)
   const [nameError, setNameError] = useState('')
-  const lastRoom = storage.read<string>('last-room', '')
+  const boardId = profile.boardId
+  const faces = previewBoard(boardId)
+  const setup = page === 'create' || page === 'join' || page === 'find'
+  const tab = page === 'boards' || page === 'profile' ? page : 'play'
   const needsCaptcha = config.online && Boolean(config.captchaKey) && !controller.hasSession
-  async function start(join = false) {
+  useEffect(() => {
+    setName(profile.name)
+  }, [profile.name])
+  useEffect(() => {
+    setCode(joinCode)
+  }, [joinCode])
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    setToken('')
+    setCaptchaAttempt((n) => n + 1)
+    setNameError('')
+  }, [page])
+  async function start() {
     if (!name.trim()) {
-      setNameError('First, give your friend a name to judge.')
+      setNameError('Choose a name to play.')
       document.getElementById('nickname')?.focus()
       return
     }
-    setNameError('')
-    storage.write('nickname', name.trim())
-    const success = join
-      ? await controller.join(code.trim().toUpperCase(), name.trim(), token)
-      : await controller.create(name.trim(), token)
+    if (!(await account.save({ ...profile, name: name.trim() }))) return
+    const success =
+      page === 'join'
+        ? await controller.join(code, name.trim(), token)
+        : page === 'find'
+          ? await controller.findPlayer(name.trim(), token, boardId)
+          : await controller.create(name.trim(), token, settings, boardId)
     if (!success) {
       setToken('')
-      setCaptchaAttempt((value) => value + 1)
+      setCaptchaAttempt((n) => n + 1)
     }
   }
+  const disabled =
+    controller.busy ||
+    account.busy ||
+    account.loading ||
+    config.incomplete ||
+    (needsCaptcha && !token)
+  const navigation = [
+    { id: 'play' as const, label: 'Play', icon: Gamepad2 },
+    { id: 'boards' as const, label: 'Boards', icon: Layers3 },
+    { id: 'profile' as const, label: 'Profile', icon: UserRound },
+  ]
   return (
-    <>
-      <header className="site-header">
+    <div className="game-shell">
+      <aside className="app-sidebar">
         <Logo />
-        <span className="header-tag">
-          <span className="small-star">✳</span> A little judgment goes a long way.
-        </span>
-        <a className="how-link" href="#how-to-play">
-          How to play <ArrowUpRight size={16} />
-        </a>
-      </header>
-      <main className="home-main">
-        <section className="hero-copy">
-          <p className="eyebrow">
-            <span className="tiny-line" /> TWO PLAYERS. ZERO OBJECTIVITY.
-          </p>
-          <h1>
-            Good questions.
-            <br />
-            <span>Questionable</span>
-            <br />
-            judgment<span className="coral-period">.</span>
-          </h1>
-          <p className="hero-description">
-            24 faces. One secret person. A whole lot of assumptions.
-            <br className="desktop-only" /> The guessing game where the vibes are the evidence.
-          </p>
-          <div className="start-card">
-            <label htmlFor="nickname">What should your friend call you?</label>
-            <input
-              id="nickname"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value.slice(0, 18))
-                setNameError('')
-              }}
-              placeholder="Your nickname"
-              autoComplete="nickname"
-              maxLength={18}
-              aria-describedby={nameError ? 'name-error' : undefined}
-            />
-            {nameError && (
-              <p className="field-error" id="name-error">
-                {nameError}
-              </p>
-            )}
-            {needsCaptcha && <Captcha key={captchaAttempt} onToken={setToken} />}
+        <p className="sidebar-caption">A little guess. A lot of fun.</p>
+        <nav aria-label="Main navigation" className="app-tabs">
+          {navigation.map(({ id, label, icon: Icon }) => (
             <button
-              className="button primary create-button"
-              onClick={() => void start()}
-              disabled={controller.busy || config.incomplete || (needsCaptcha && !token)}
+              key={id}
+              aria-current={tab === id ? 'page' : undefined}
+              disabled={Boolean(controller.search)}
+              onClick={() => navigatePage(id)}
             >
-              <Plus size={20} />
-              {controller.busy ? 'Getting things ready…' : 'Create game'}
-              <ArrowRight size={20} />
+              <Icon size={25} strokeWidth={tab === id ? 2.5 : 1.8} />
+              <span>{label}</span>
             </button>
-            <div className="join-divider">
-              <span>already have a room?</span>
-            </div>
-            {joining ? (
-              <form
-                className="join-form"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  void start(true)
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <LogoMark />
+          <b>Trust your gut.</b>
+          <span>Keep it kind. Keep it fun.</span>
+        </div>
+      </aside>
+      <div className="app-body">
+        <header className="app-header">
+          <Logo />
+          <span className="app-header-label">
+            {tab === 'play'
+              ? 'THE GUESSING GAME'
+              : tab === 'boards'
+                ? 'YOUR COLLECTION'
+                : 'YOUR PLAYER'}
+          </span>
+          <button
+            className="player-chip"
+            aria-label="Open your profile"
+            disabled={Boolean(controller.search)}
+            onClick={() => navigatePage('profile')}
+          >
+            <span aria-hidden="true">{profile.avatar}</span>
+            <b>{profile.name || 'Your profile'}</b>
+          </button>
+        </header>
+        <main className={`app-content ${setup ? 'setup-screen' : ''}`} key={page}>
+          {controller.search ? (
+            <section className="search-screen">
+              <div className="search-faces">
+                <Portrait character={faces[0]!} />
+                <span>
+                  <Shuffle />
+                </span>
+                <Portrait character={faces[1]!} />
+              </div>
+              <p className="screen-kicker">QUICK MATCH</p>
+              <h1>Finding a player…</h1>
+              <p role="status">Looking for another player. Hang tight!</p>
+              <span className="soft-chip">{boardInfo(controller.search.boardId).name}</span>
+              <button
+                className="button secondary"
+                disabled={controller.busy}
+                onClick={async () => {
+                  if (await controller.cancelSearch()) navigatePage('play')
                 }}
               >
-                <label className="sr-only" htmlFor="room-code">
-                  7-character room code
+                Cancel search
+              </button>
+            </section>
+          ) : page === 'profile' ? (
+            <ProfilePage account={account} onSessionChange={controller.refreshSession} />
+          ) : page === 'boards' ? (
+            <BoardCollection
+              value={boardId}
+              busy={account.busy || account.loading}
+              onChoose={async (id) => {
+                if (await account.save({ ...profile, boardId: id })) navigatePage('play')
+              }}
+            />
+          ) : setup ? (
+            <>
+              <button className="back-button" onClick={() => navigatePage('play')}>
+                <ChevronLeft size={23} /> Play
+              </button>
+              <div className="screen-heading">
+                <p className="screen-kicker">
+                  {page === 'join'
+                    ? 'GOT A CODE?'
+                    : page === 'find'
+                      ? 'MEET YOUR MATCH'
+                      : 'YOU’RE THE HOST'}
+                </p>
+                <h1>
+                  {page === 'join'
+                    ? 'Join a game.'
+                    : page === 'find'
+                      ? 'Find a player.'
+                      : 'Create a game.'}
+                </h1>
+                <p>
+                  {page === 'join'
+                    ? 'Enter the code your friend shared.'
+                    : page === 'find'
+                      ? 'We’ll find someone to play with.'
+                      : 'Pick a board. Invite a friend.'}
+                </p>
+              </div>
+              <form
+                className="setup-card"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  void start()
+                }}
+                noValidate
+              >
+                <label className="input-label" htmlFor="nickname">
+                  Your name
                 </label>
                 <input
-                  id="room-code"
-                  className="code-input"
-                  placeholder="ROOM CODE"
-                  value={code}
-                  onChange={(event) =>
-                    setCode(
-                      event.target.value
-                        .toUpperCase()
-                        .replace(/[^A-F0-9]/g, '')
-                        .slice(0, 7),
-                    )
-                  }
-                  maxLength={7}
-                  autoCapitalize="characters"
-                  autoComplete="off"
-                  autoFocus={Boolean(joinCode)}
+                  id="nickname"
+                  aria-label="Your name. What should your friend call you?"
+                  value={name}
+                  autoComplete="nickname"
+                  maxLength={18}
+                  placeholder="What should we call you?"
+                  aria-invalid={Boolean(nameError)}
+                  aria-describedby={nameError ? 'name-error' : undefined}
+                  onChange={(event) => {
+                    setName(event.target.value)
+                    setNameError('')
+                  }}
                 />
+                {nameError && (
+                  <p id="name-error" className="field-error" role="alert">
+                    {nameError}
+                  </p>
+                )}
+                {page === 'join' ? (
+                  <>
+                    <label className="input-label" htmlFor="room-code">
+                      Room code
+                    </label>
+                    <input
+                      id="room-code"
+                      className="code-input"
+                      aria-label="7-character room code"
+                      value={code}
+                      placeholder="ABC1234"
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      maxLength={7}
+                      onChange={(event) =>
+                        setCode(
+                          event.target.value
+                            .toUpperCase()
+                            .replace(/[^A-F0-9]/g, '')
+                            .slice(0, 7),
+                        )
+                      }
+                    />
+                  </>
+                ) : (
+                  <BoardPicker
+                    value={boardId}
+                    onChange={(id) => void account.save({ ...profile, boardId: id })}
+                  />
+                )}
+                {page === 'create' && (
+                  <details className="settings-disclosure">
+                    <summary>
+                      <Settings2 size={18} /> Room settings
+                    </summary>
+                    <RoomSettings value={settings} onChange={setSettings} />
+                  </details>
+                )}
+                {needsCaptcha && <Captcha key={captchaAttempt} onToken={setToken} />}
                 <button
-                  className="button secondary"
-                  disabled={controller.busy || code.length !== 7 || (needsCaptcha && !token)}
+                  className="button primary setup-submit"
+                  type="submit"
+                  disabled={disabled || (page === 'join' && code.length !== 7)}
                 >
-                  Join <ArrowRight size={18} />
+                  {page === 'join' ? (
+                    <Link size={23} />
+                  ) : page === 'find' ? (
+                    <Shuffle size={23} />
+                  ) : (
+                    <Plus size={23} />
+                  )}
+                  {controller.busy
+                    ? 'Getting ready…'
+                    : page === 'join'
+                      ? 'Join'
+                      : page === 'find'
+                        ? 'Find a player'
+                        : 'Create game'}
                 </button>
+                {!config.online && (
+                  <p className="device-note">Local preview · both players use this device</p>
+                )}
               </form>
-            ) : (
-              <button className="button secondary join-open" onClick={() => setJoining(true)}>
-                <Link size={19} /> Join game
+            </>
+          ) : (
+            <>
+              <div className="screen-heading play-heading">
+                <div>
+                  <p className="screen-kicker">
+                    {profile.name ? `HEY, ${profile.name.toUpperCase()}!` : 'GOOD TO SEE YOU'}
+                  </p>
+                  <h1>Let’s play.</h1>
+                  <p>One friend. One secret face.</p>
+                </div>
+                <button
+                  className="help-button"
+                  aria-label="How to play"
+                  onClick={() => setHelp(true)}
+                >
+                  <HelpCircle size={24} />
+                </button>
+              </div>
+              <section className="game-hero" aria-label="24 faces. One secret person.">
+                <div className="game-hero-copy">
+                  <span className="hero-game-badge">
+                    <Users size={16} /> 2 players
+                  </span>
+                  <h2>
+                    Who’s their
+                    <br />
+                    secret person?
+                  </h2>
+                  <span className="hero-bottom-note">
+                    <span /> Guess it. Win it.
+                  </span>
+                </div>
+                <div className="hero-face-stack" aria-hidden="true">
+                  {faces.map((face, index) => (
+                    <div className={`hero-portrait face-${index}`} key={face.id}>
+                      <Portrait character={face} />
+                      <span>{index === 1 ? '?' : face.name}</span>
+                    </div>
+                  ))}
+                </div>
+                <span className="hero-spark" aria-hidden="true">
+                  ✦
+                </span>
+              </section>
+              <div className="play-choices">
+                <button
+                  className="play-choice choice-create"
+                  aria-label="Create game"
+                  onClick={() => navigatePage('create')}
+                >
+                  <span className="choice-icon">
+                    <Plus size={30} />
+                  </span>
+                  <strong>Create game</strong>
+                  <span>Invite your friend</span>
+                </button>
+                <button
+                  className="play-choice choice-join"
+                  aria-label="Join game"
+                  onClick={() => navigatePage('join')}
+                >
+                  <span className="choice-icon">
+                    <Link size={29} />
+                  </span>
+                  <strong>Join game</strong>
+                  <span>Use a room code</span>
+                </button>
+              </div>
+              {config.online && (
+                <button
+                  className="quick-match"
+                  aria-label="Find a player"
+                  onClick={() => navigatePage('find')}
+                >
+                  <Shuffle size={22} />
+                  <span>
+                    <b>Find a player</b>
+                    <small>Ready for someone new?</small>
+                  </span>
+                  <span className="soft-chip">Quick match</span>
+                </button>
+              )}
+              <button className="selected-board" onClick={() => navigatePage('boards')}>
+                <span className="selected-board-faces" aria-hidden="true">
+                  {faces.slice(0, 3).map((face) => (
+                    <Portrait key={face.id} character={face} />
+                  ))}
+                </span>
+                <span>
+                  <small>Your board</small>
+                  <b>{boardInfo(boardId).name}</b>
+                </span>
+                <span className="board-change">Change</span>
               </button>
-            )}
-            <p className="start-note">
-              <Users size={14} /> 2 friends <span>·</span> No sign-up <span>·</span> Free to play
-            </p>
-            {!config.online && (
-              <p className="preview-note">
-                <span className="status-dot" /> Local preview · online setup pending
-              </p>
-            )}
-          </div>
-          {lastRoom && (
-            <button className="resume-link" onClick={() => navigateRoom(lastRoom)}>
-              Back to your last room <ArrowRight size={14} />
-            </button>
+              <div className="play-footnote">
+                <Check size={16} /> Free to play <span>·</span>
+                <button onClick={() => setHelp(true)}>How to play</button>
+              </div>
+              {!config.online && (
+                <p className="device-note">Local preview · play both seats on this device</p>
+              )}
+              {storage.read<string>('last-room', '') && (
+                <button
+                  className="resume-link"
+                  onClick={() => navigateRoom(storage.read<string>('last-room', ''))}
+                >
+                  Rejoin your last game
+                </button>
+              )}
+            </>
           )}
-        </section>
-        <section className="hero-art" aria-label="Meet a few very questionable characters">
-          <span className="art-spark spark-one" aria-hidden="true">
-            ✳
-          </span>
-          <span className="art-spark spark-two" aria-hidden="true">
-            ✧
-          </span>
-          <div className="art-orbit" />
-          <div className="hero-portrait hero-portrait-back">
-            <Portrait character={characters[2]!} />
-            <span>
-              Cleo <Heart size={15} />
-            </span>
-          </div>
-          <div className="hero-portrait hero-portrait-front">
-            <Portrait character={characters[1]!} />
-            <span>
-              Milo <span className="mini-question">?</span>
-            </span>
-          </div>
-          <div className="question-bubble">
-            <MessageCircle size={21} />
-            <p>
-              “Would they clap when
-              <br />
-              the plane lands?”
+          {account.error && page !== 'profile' && (
+            <p className="form-error" role="alert">
+              {account.error}
             </p>
-            <span className="bubble-tail" />
+          )}
+        </main>
+      </div>
+      {help && (
+        <Sheet title="How to play" onClose={() => setHelp(false)}>
+          <div className="simple-rules">
+            <div>
+              <span>🤫</span>
+              <h3>Pick a secret face</h3>
+              <p>Keep it a secret from your friend.</p>
+            </div>
+            <div>
+              <span>💬</span>
+              <h3>Ask yes-or-no questions</h3>
+              <p>Tap faces to rule them out.</p>
+            </div>
+            <div>
+              <span>🎯</span>
+              <h3>Guess their person</h3>
+              <p>A right guess wins. A wrong guess loses!</p>
+            </div>
           </div>
-          <span className="yes-sticker">
-            <Check size={22} /> oh, absolutely.
-          </span>
-          <div className="art-caption">
-            <span className="curved-arrow" aria-hidden="true">
-              ↖
-            </span>{' '}
-            You know the type.
-          </div>
-          <div className="party-stamp">
-            TRUST YOUR
-            <br />
-            <strong>gut feeling.</strong>
-            <Sparkles size={20} />
-          </div>
-        </section>
-      </main>
-      <section className="how-section" id="how-to-play">
-        <div className="how-title">
-          <span className="eyebrow">SMALL RULES. BIG OPINIONS.</span>
-          <h2>It’s all in your head.</h2>
-        </div>
-        <div className="how-step">
-          <span className="step-icon mint">
-            <MousePointer2 size={24} />
-            <b>01</b>
-          </span>
-          <h3>Pick your person.</h3>
-          <p>Choose a secret face. Keep it to yourself.</p>
-        </div>
-        <div className="how-step">
-          <span className="step-icon lilac">
-            <MessageCircle size={24} />
-            <b>02</b>
-          </span>
-          <h3>Ask about the vibes.</h3>
-          <p>Take turns asking yes-or-no questions. Tap faces to rule them out.</p>
-        </div>
-        <div className="how-step">
-          <span className="step-icon peach">
-            <Sparkles size={24} />
-            <b>03</b>
-          </span>
-          <h3>Make your call.</h3>
-          <p>Guess their person to win. Get it wrong and they take the glory.</p>
-        </div>
-      </section>
-      <footer className="site-footer">
-        <span>Made for friends with strong opinions.</span>
-        <a href="/?page=privacy">
-          Privacy & the fine print <ArrowUpRight size={13} />
-        </a>
-        <span className="footer-mark">
-          Stay subjective. <span aria-hidden="true">✳</span>
-        </span>
-      </footer>
-    </>
-  )
-}
-
-export function Privacy() {
-  return (
-    <>
-      <header className="site-header">
-        <Logo />
-      </header>
-      <main className="privacy-page">
-        <p className="eyebrow">THE FINE PRINT</p>
-        <h1>
-          Your game.
-          <br />
-          <span>Your business.</span>
-        </h1>
-        <p>
-          This game uses a persistent anonymous Supabase session so you can reconnect without an
-          account. Your nickname, room membership, secret character, and question history are stored
-          in the game database. Your opponent sees your secret only when the round ends.
-        </p>
-        <p>
-          Room data expires after 24 hours of inactivity and is deleted by the configured hourly
-          retention job. Previous rounds in an active room are capped at 20 by that job. Anonymous
-          authentication records require a separate retention job; the deployment guide includes it.
-        </p>
-        <p>
-          Your draft questions, eliminated faces, nickname, and last room stay in this browser.
-          Local preview stores both seats and both secrets on this device. Reactions are ephemeral.
-          We add no analytics, advertising, or tracking cookies. Supabase, Vercel, and a configured
-          CAPTCHA provider process connection information needed to operate the service.
-        </p>
-        <p>
-          Keep questions kind. Don’t put personal or sensitive information in your nickname or
-          questions. This is a game about fictional illustrated characters.
-        </p>
-        {config.supportEmail ? (
-          <p>
-            For support or a data deletion request, email{' '}
-            <a href={`mailto:${config.supportEmail}`}>{config.supportEmail}</a>. Include your room
-            code and nickname so the operator can locate your data.
-          </p>
-        ) : (
-          <p className="preview-note">
-            The operator’s support contact is not configured. Add it before public launch.
-          </p>
-        )}
-        <p>
-          Font and icon credits are preserved in the{' '}
-          <a href="/THIRD_PARTY_NOTICES.txt">third-party notices</a>.
-        </p>
-        <a className="button primary" href="/">
-          Back to the game <ArrowRight size={18} />
-        </a>
-      </main>
-    </>
+          <button className="button primary" onClick={() => setHelp(false)}>
+            Got it. Let’s play!
+          </button>
+        </Sheet>
+      )}
+    </div>
   )
 }

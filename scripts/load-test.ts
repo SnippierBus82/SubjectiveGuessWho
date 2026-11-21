@@ -9,10 +9,11 @@ import { readFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 
 const url = process.env.LOAD_SUPABASE_URL,
-  key = process.env.LOAD_SUPABASE_PUBLISHABLE_KEY
-if (!url || !key || process.env.LOAD_CONFIRM !== 'isolated-test-project') {
+  key = process.env.LOAD_SUPABASE_PUBLISHABLE_KEY,
+  appUrl = process.env.LOAD_APP_URL?.replace(/\/$/, '')
+if (!url || !key || !appUrl || process.env.LOAD_CONFIRM !== 'isolated-test-project') {
   console.error(
-    'Set LOAD_SUPABASE_URL, LOAD_SUPABASE_PUBLISHABLE_KEY, and LOAD_CONFIRM=isolated-test-project. See SCALING.md.',
+    'Set LOAD_APP_URL, LOAD_SUPABASE_URL, LOAD_SUPABASE_PUBLISHABLE_KEY, and LOAD_CONFIRM=isolated-test-project. See SCALING.md.',
   )
   process.exitCode = 1
 } else {
@@ -73,6 +74,8 @@ if (!url || !key || process.env.LOAD_CONFIRM !== 'isolated-test-project') {
     return data.state as {
       roomId: string
       code: string
+      boardStatus: string
+      board: { id: string }[]
       game: { id: string; turn: number; activePlayer: string }
     }
   }
@@ -91,16 +94,47 @@ if (!url || !key || process.env.LOAD_CONFIRM !== 'isolated-test-project') {
       })
     })
   }
+  async function boardApi(client: SupabaseClient, body: Record<string, unknown>) {
+    const { data } = await client.auth.getSession()
+    const result = await fetch(`${appUrl}/api/boards`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${data.session!.access_token}`,
+      },
+      body: JSON.stringify(body),
+    })
+    const response = await result.json()
+    if (!result.ok || response.error)
+      throw new Error('Board preparation failed; check the isolated app backend.')
+    return response
+  }
   async function pair(index: number) {
     await delays(index * rampMs)
     try {
       const a = await clientFor(index * 2),
         b = await clientFor(index * 2 + 1)
-      let state = await rpc(a.client, 'create_room', {
+      const boardId = process.env.LOAD_BOARD_ID ?? 'ai-random'
+      await boardApi(a.client, { operation: 'register', boardId })
+      let state = await rpc(a.client, 'create_room_board_v2', {
         p_nickname: 'Load A',
         p_request_id: randomUUID(),
+        p_settings: { question: 120, answer: 30, review: 60 },
+        p_board_id: boardId,
       })
-      state = await rpc(b.client, 'join_room', { p_code: state.code, p_nickname: 'Load B' })
+      state = await rpc(b.client, 'join_room_v2', { p_code: state.code, p_nickname: 'Load B' })
+      const preparationLimit = Date.now() + 100000
+      while (state.boardStatus !== 'ready') {
+        if (Date.now() > preparationLimit) throw new Error('Board preparation timed out.')
+        state = (
+          await boardApi(a.client, {
+            operation: 'prepare',
+            roomId: state.roomId,
+            gameId: state.game.id,
+          })
+        ).state
+        if (state.boardStatus !== 'ready') await delays(3000)
+      }
       for (const player of [a, b]) {
         const channel = player.client
           .channel(`game:${state.roomId}`, { config: { private: true } })
@@ -120,7 +154,7 @@ if (!url || !key || process.env.LOAD_CONFIRM !== 'isolated-test-project') {
         await social.track({ online: true })
       }
       const act = (player: typeof a, kind: string, payload = {}) =>
-        rpc(player.client, 'game_action', {
+        rpc(player.client, 'game_action_v2', {
           p_room_id: state.roomId,
           p_game_id: state.game.id,
           p_turn: state.game.turn,
@@ -128,21 +162,23 @@ if (!url || !key || process.env.LOAD_CONFIRM !== 'isolated-test-project') {
           p_kind: kind,
           p_payload: payload,
         })
-      state = await act(a, 'select', { characterId: 'amara' })
-      state = await act(b, 'select', { characterId: 'milo' })
+      state = await act(a, 'select', { characterId: state.board[0]!.id })
+      state = await act(b, 'select', { characterId: state.board[1]!.id })
       state = await act(a, 'ready')
       state = await act(b, 'ready')
       const end = Date.now() + seconds * 1000
       while (Date.now() < end) {
         const asker = state.game.activePlayer === a.id ? a : b,
           answerer = asker === a ? b : a
+        if (state.game.turn > 1) state = await act(answerer, 'review')
         state = await act(asker, 'question', { text: 'Would they start a podcast?' })
         state = await act(answerer, 'answer', { answer: true })
         await delays(10000)
       }
       // Canonical snapshots model a refreshed page without relying on missed events.
-      await rpc(a.client, 'get_room', { p_room_id: state.roomId })
-      await rpc(b.client, 'get_room', { p_room_id: state.roomId })
+      await rpc(a.client, 'get_room_v2', { p_room_id: state.roomId })
+      await rpc(b.client, 'get_room_v2', { p_room_id: state.roomId })
+      await act(a, 'leave')
       completedPairs++
     } catch (error) {
       failures++

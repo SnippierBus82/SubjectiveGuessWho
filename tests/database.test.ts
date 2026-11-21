@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { stat } from 'node:fs/promises'
 import { makeDatabase, users, type RpcResponse } from './support/database'
-import { characters } from '../src/game/characters'
+import { characters } from '../src/game/legacy/characters'
 import type { RoomState } from '../src/game/types'
 
 const a = users[0]!,
@@ -320,7 +320,8 @@ describe('guessing, rematches, realtime, retention', () => {
           ),
         topic,
       )
-    await send(a, `social:${room.roomId}`)
+    await expect(send(a, `social:${room.roomId}`)).rejects.toMatchObject({ code: '42501' })
+    await db.rpc(a, 'send_reaction_v2', [room.roomId, randomUUID(), '\u{1F602}'])
     await expect(send(a, `game:${room.roomId}`)).rejects.toMatchObject({ code: '42501' })
     await expect(send(stranger, `social:${room.roomId}`)).rejects.toMatchObject({ code: '42501' })
     await expect(send(a, 'social:invalid')).rejects.toMatchObject({ code: '42501' })

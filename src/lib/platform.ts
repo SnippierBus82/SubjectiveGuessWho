@@ -45,6 +45,11 @@ export function navigateRoom(id?: string) {
   history.pushState(null, '', target)
   dispatchEvent(new PopStateEvent('popstate'))
 }
+export type AppPage = 'play' | 'create' | 'join' | 'find' | 'boards' | 'profile' | 'privacy'
+export function navigatePage(page: AppPage) {
+  history.pushState(null, '', page === 'play' ? '/' : `/?page=${page}`)
+  dispatchEvent(new PopStateEvent('popstate'))
+}
 export function newId(): string {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID()
   // Custom HTTP development hosts lack randomUUID, but still expose getRandomValues.

@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const enabled = Boolean(process.env.E2E_SUPABASE_URL && process.env.E2E_SUPABASE_PUBLISHABLE_KEY)
+const enabled = Boolean(process.env.E2E_SUPABASE_URL && process.env.E2E_SUPABASE_PUBLISHABLE_KEY && process.env.E2E_SUPABASE_SECRET_KEY)
 export default defineConfig({
   testDir: './tests/live',
+  outputDir: './test-results/live',
   workers: 1,
   timeout: 90000,
   reporter: 'list',
@@ -16,7 +17,10 @@ export default defineConfig({
         env: {
           VITE_SUPABASE_URL: process.env.E2E_SUPABASE_URL!,
           VITE_SUPABASE_PUBLISHABLE_KEY: process.env.E2E_SUPABASE_PUBLISHABLE_KEY!,
+          SUPABASE_SECRET_KEY: process.env.E2E_SUPABASE_SECRET_KEY ?? '',
           VITE_TURNSTILE_SITE_KEY: '',
+          VITE_HCAPTCHA_SITE_KEY: '',
+          VITE_APP_URL: '',
         },
       }
     : undefined,

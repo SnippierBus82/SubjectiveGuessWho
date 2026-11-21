@@ -2,7 +2,7 @@
 
 ## Design target
 
-The design target is **1,000 concurrent players / 500 rooms**, not a measured production guarantee. This implementation has not been tested at that concurrency. The frontend is static on Vercel; PostgreSQL and Realtime are managed by Supabase. There is no application server, per-room process, Redis, or in-memory authoritative state.
+The design target is **1,000 concurrent players / 500 rooms**, not a measured production guarantee. This implementation has not been tested at that concurrency. The frontend is static on Vercel; PostgreSQL and Realtime are managed by Supabase. A stateless Vercel function registers folder packs and prepares game images; gameplay remains authoritative in PostgreSQL, with no per-room process or Redis.
 
 Every player has one Realtime connection with two private channels: a receive-only game topic and a social Broadcast/Presence topic. Gameplay writes lock one indexed room row and execute atomically. Notifications contain only `{version}`; clients fetch a caller-specific snapshot and ignore older versions. Concurrent invalidations coalesce with a follow-up fetch if another notification arrives during a request.
 
@@ -65,3 +65,9 @@ Suggested acceptance targets to validate, not claims of measured behavior: no fo
 - Track receipt/rate-limit table growth and cleanup success. Review slow-query plans, authorization pool settings, timeout conflicts, and storage weekly after launch.
 
 The managed-service architecture supports growth without a backend rewrite, within measured PostgreSQL/Realtime limits. A different architecture should follow demonstrated bottlenecks.
+
+## Board preparation in load tests
+
+Set `LOAD_APP_URL` to the isolated app deployment (whose server key points to the same isolated Supabase project), in addition to the existing test-project variables. The script registers the selected pack, waits for shared preparation, and selects actual returned character IDs. Use `LOAD_BOARD_ID=folder/Your%20board` with a deployed folder pack when measuring gameplay capacity so the test does not generate a burst of public Hugging Face requests. The default `ai-random` includes source acquisition and Storage costs; measure that separately at low concurrency.
+
+The board backend is stateless and uses database preparation leases, rate limits and immutable Storage images. Timeouts fall back only on upstream source failure. Record preparation latency/source outcomes separately from gameplay RPC latency. Existing capacity figures above are design targets, not measurements of this added backend.

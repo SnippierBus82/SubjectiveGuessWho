@@ -1,6 +1,43 @@
-export type Phase = 'lobby' | 'question' | 'answer' | 'finished'
+import type { Character } from './characters'
+import type { BoardId } from './boards'
+export interface Timings {
+  question: number | null
+  answer: number | null
+  review: number | null
+}
+export interface TurnFlow {
+  startedAt: string | null
+  writingDeadline: string | null
+  reviewDeadline: string | null
+  submitted: boolean
+  reviewReady: boolean
+  ownSubmission: string | null
+}
+export interface Pause {
+  reason: 'timeout' | 'disconnect'
+  since: string
+  missing: string | null
+  resumeReady: string[]
+}
+export interface MatchStatus {
+  status: 'waiting' | 'matched' | 'idle'
+  queuedAt?: string
+  roomId?: string
+  boardId?: BoardId
+}
+export type Phase = 'lobby' | 'question' | 'answer' | 'paused' | 'finished'
 export type ActionKind =
-  'select' | 'ready' | 'unready' | 'question' | 'answer' | 'guess' | 'rematch'
+  | 'select'
+  | 'ready'
+  | 'unready'
+  | 'question'
+  | 'answer'
+  | 'guess'
+  | 'rematch'
+  | 'review'
+  | 'resume'
+  | 'leave'
+  | 'end'
 export type Connection = 'connecting' | 'online' | 'reconnecting' | 'offline' | 'preview'
 export interface Player {
   id: string
@@ -29,6 +66,9 @@ export interface Game {
   guesser: string | null
   guessCharacter: string | null
   result: 'correct' | 'incorrect' | null
+  flow?: TurnFlow
+  pause?: Pause | null
+  endReason?: string | null
 }
 export interface RoomState {
   roomId: string
@@ -41,6 +81,15 @@ export interface RoomState {
   myCharacter: string | null
   reveals: Record<string, string> | null
   history: Question[]
+  rulesVersion?: number
+  settings?: Timings
+  board?: Character[]
+  boardId?: BoardId
+  mode?: 'private' | 'match'
+  boardStatus?: 'pending' | 'ready' | 'error'
+  boardLabel?: string
+  boardSource?: 'folder' | 'online' | 'cache' | null
+  boardError?: string | null
   // Added by the transport after an RPC, never sent as an authoritative input.
   clientTiming?: { startedAt: number; receivedAt: number }
 }
@@ -49,7 +98,32 @@ export interface Reaction {
   emoji: string
   from: string
 }
-export const REACTIONS = ['😂', '💀', '❤️', '😭', '🤨', '👍'] as const
+export const REACTIONS = [
+  '😂',
+  '💀',
+  '❤️',
+  '😭',
+  '🤨',
+  '👍',
+  '🤔',
+  '👀',
+  '😮',
+  '😎',
+  '🤯',
+  '🙃',
+  '😅',
+  '🥳',
+  '🙈',
+  '🙄',
+  '👏',
+  '🔥',
+  '💅',
+  '😬',
+  '🫣',
+  '🧐',
+  '😏',
+  '🤝',
+] as const
 export interface SubscriptionCallbacks {
   invalidate: (version?: number) => void
   connection: (status: Connection) => void
@@ -59,7 +133,13 @@ export interface SubscriptionCallbacks {
 export interface GameService {
   mode: 'online' | 'preview'
   session: () => Promise<boolean>
-  create: (name: string, requestId: string, captcha?: string) => Promise<RoomState>
+  create: (
+    name: string,
+    requestId: string,
+    captcha?: string,
+    settings?: Timings,
+    boardId?: BoardId,
+  ) => Promise<RoomState>
   join: (code: string, name: string, captcha?: string) => Promise<RoomState>
   snapshot: (roomId: string) => Promise<RoomState>
   action: (
@@ -69,7 +149,16 @@ export interface GameService {
     actionId: string,
   ) => Promise<RoomState>
   subscribe: (roomId: string, you: string, callbacks: SubscriptionCallbacks) => Promise<() => void>
-  react: (emoji: string, you: string) => Promise<void>
+  react: (emoji: string, you: string, id?: string) => Promise<void>
+  heartbeat?: (roomId: string, version: number) => Promise<RoomState | null>
+  prepareBoard?: (state: RoomState) => Promise<RoomState | null>
+  match?: (
+    name: string,
+    command: 'join' | 'pulse' | 'cancel',
+    captcha?: string,
+    boardId?: BoardId,
+  ) => Promise<MatchStatus>
+  subscribeMatch?: (invalidate: () => void) => Promise<() => void>
   switchSeat?: () => Promise<RoomState>
 }
 export class GameError extends Error {

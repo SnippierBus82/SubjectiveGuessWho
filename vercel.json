@@ -5,7 +5,11 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/((?!assets/|characters/|fonts/|favicon.svg|THIRD_PARTY_NOTICES.txt).*)",
+      "source": "/boards/one-million-faces-v1/:file",
+      "destination": "/ai-face-cache/:file"
+    },
+    {
+      "source": "/((?!api/|ai-face-cache/|social-preview.png|SGW.svg|assets/|characters/|boards/|fonts/|favicon.svg|manifest.webmanifest|icon-192.png|icon-512.png|apple-touch-icon.png|THIRD_PARTY_NOTICES.txt).*)",
       "destination": "/index.html"
     }
   ],
@@ -27,9 +31,14 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; frame-src https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com; img-src 'self' data: https://*.supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; frame-src https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/boards.ts": {
+      "maxDuration": 120
+    }
+  }
 }

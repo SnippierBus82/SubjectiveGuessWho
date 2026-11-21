@@ -1,0 +1,4850 @@
+{
+  "$schema": "./characters.schema.json",
+  "schemaVersion": 1,
+  "styleId": "sgw-3d-adult-v1",
+  "characters": [
+    {
+      "id": "sgw-001",
+      "name": "Amara",
+      "status": "planned",
+      "fileName": "sgw-001.png",
+      "brief": "Amara is a fictional 34-year-old woman. Knowing asymmetric closed-mouth smile, one eyebrow slightly raised; warmly amused.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "feminine",
+        "skinTone": "deep",
+        "faceShape": "soft-square",
+        "nose": "broad with a softly rounded tip",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "high loose puff",
+          "color": "dark-brown",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "hoops",
+          "color": "copper"
+        },
+        "outfit": {
+          "type": "knit-cardigan",
+          "color": "aubergine",
+          "accentColor": "terracotta"
+        },
+        "skinDetails": [
+          "small beauty mark on left cheek"
+        ],
+        "expression": "Knowing asymmetric closed-mouth smile, one eyebrow slightly raised; warmly amused."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-002",
+      "name": "Milo",
+      "status": "planned",
+      "fileName": "sgw-002.png",
+      "brief": "Milo is a fictional 27-year-old man. Cheerful lopsided smile with a little upper teeth visible; mischievous energy.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "very-light",
+        "faceShape": "round",
+        "nose": "short and upturned",
+        "eyes": {
+          "color": "green",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "tousled short curls",
+          "color": "ginger",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "fine-moustache",
+          "color": "ginger"
+        },
+        "glasses": {
+          "style": "round",
+          "color": "antique-brass"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-sweater",
+          "color": "sage",
+          "accentColor": "ivory"
+        },
+        "skinDetails": [
+          "freckles across nose and cheeks"
+        ],
+        "expression": "Cheerful lopsided smile with a little upper teeth visible; mischievous energy."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-003",
+      "name": "Cleo",
+      "status": "planned",
+      "fileName": "sgw-003.png",
+      "brief": "Cleo is a fictional 48-year-old woman. Dry amused skepticism, one eyebrow up, a subtle closed-mouth half-smile.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "square",
+        "nose": "small and straight",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "upturned"
+        },
+        "hair": {
+          "style": "chin-length bob with blunt fringe",
+          "color": "black",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "geometric-studs",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "tailored-jacket",
+          "color": "mustard",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "tiny healed notch through one eyebrow",
+          "fine smile lines"
+        ],
+        "expression": "Dry amused skepticism, one eyebrow up, a subtle closed-mouth half-smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-004",
+      "name": "Hugo",
+      "status": "planned",
+      "fileName": "sgw-004.png",
+      "brief": "Hugo is a fictional 64-year-old man. Warmly bemused, eyes smiling, one corner of the mouth rising within the beard.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "broad-square",
+        "nose": "large and bulbous",
+        "eyes": {
+          "color": "hazel",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "short swept-back hair",
+          "color": "salt-and-pepper",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "full-beard",
+          "color": "salt-and-pepper"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "flat-cap",
+          "color": "navy"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "waxed-jacket",
+          "color": "brown",
+          "accentColor": "oatmeal"
+        },
+        "skinDetails": [
+          "crow's feet",
+          "weathered cheeks"
+        ],
+        "expression": "Warmly bemused, eyes smiling, one corner of the mouth rising within the beard."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-005",
+      "name": "Priya",
+      "status": "planned",
+      "fileName": "sgw-005.png",
+      "brief": "Priya is a fictional 42-year-old woman. Confident conspiratorial crooked smile and a lively lifted brow.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "long-oval",
+        "nose": "prominent and gracefully arched",
+        "eyes": {
+          "color": "amber",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "long side-swept waves",
+          "color": "black",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "cat-eye",
+          "color": "burgundy"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "teardrops",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "blazer",
+          "color": "cream",
+          "accentColor": "ruby"
+        },
+        "skinDetails": [
+          "small gold nose stud",
+          "subtle smile lines"
+        ],
+        "expression": "Confident conspiratorial crooked smile and a lively lifted brow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-006",
+      "name": "Felix",
+      "status": "planned",
+      "fileName": "sgw-006.png",
+      "brief": "Felix is a fictional 53-year-old man. Relaxed charming smirk with one eyebrow raised; understated confidence.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "long",
+        "nose": "gently hooked",
+        "eyes": {
+          "color": "blue",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "short swept-back hair with silver temples",
+          "color": "dark-brown",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "pencil-moustache",
+          "color": "dark-brown"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "leather-jacket",
+          "color": "dark-brown",
+          "accentColor": "teal"
+        },
+        "skinDetails": [
+          "small healed cheek scar",
+          "light stubble"
+        ],
+        "expression": "Relaxed charming smirk with one eyebrow raised; understated confidence."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-007",
+      "name": "Zara",
+      "status": "planned",
+      "fileName": "sgw-007.png",
+      "brief": "Zara is a fictional 24-year-old woman. Bright curious expression with a small delighted smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "very-deep",
+        "faceShape": "heart",
+        "nose": "broad with a low bridge",
+        "eyes": {
+          "color": "brown",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "asymmetric cropped pixie",
+          "color": "cobalt-blue",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "ear-cuff",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "structured-jacket",
+          "color": "coral",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "small beauty mark above upper lip"
+        ],
+        "expression": "Bright curious expression with a small delighted smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-008",
+      "name": "Oscar",
+      "status": "planned",
+      "fileName": "sgw-008.png",
+      "brief": "Oscar is a fictional 73-year-old man. Thoughtful gentle squint and a patient closed-mouth smile.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "round",
+        "nose": "large and rounded",
+        "eyes": {
+          "color": "grey",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "bald crown with side fringe",
+          "color": "white",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "short-beard",
+          "color": "white"
+        },
+        "glasses": {
+          "style": "oval",
+          "color": "forest-green"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "tweed-jacket",
+          "color": "forest-green",
+          "accentColor": "ochre"
+        },
+        "skinDetails": [
+          "forehead lines",
+          "rosy cheeks"
+        ],
+        "expression": "Thoughtful gentle squint and a patient closed-mouth smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-009",
+      "name": "Olive",
+      "status": "planned",
+      "fileName": "sgw-009.png",
+      "brief": "Olive is a fictional 68-year-old woman. Cheerful knowing grin, chin slightly tilted upward.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "light",
+        "faceShape": "heart",
+        "nose": "slim with a rounded tip",
+        "eyes": {
+          "color": "blue",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "low loose bun",
+          "color": "silver",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "sunhat",
+          "color": "straw"
+        },
+        "earrings": {
+          "style": "pearl-studs",
+          "color": "cream"
+        },
+        "outfit": {
+          "type": "linen-jacket",
+          "color": "terracotta",
+          "accentColor": "ivory"
+        },
+        "skinDetails": [
+          "soft crow's feet",
+          "light freckles"
+        ],
+        "expression": "Cheerful knowing grin, chin slightly tilted upward."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-010",
+      "name": "Jasper",
+      "status": "planned",
+      "fileName": "sgw-010.png",
+      "brief": "Jasper is a fictional 39-year-old man. Steady skeptical gaze, one brow lifted, a restrained half-smile.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "deep",
+        "faceShape": "square",
+        "nose": "broad and straight",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "close buzz cut",
+          "color": "black",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "short-boxed-beard",
+          "color": "black"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "work-jacket",
+          "color": "indigo",
+          "accentColor": "rust"
+        },
+        "skinDetails": [
+          "small eyebrow scar"
+        ],
+        "expression": "Steady skeptical gaze, one brow lifted, a restrained half-smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-011",
+      "name": "Luna",
+      "status": "planned",
+      "fileName": "sgw-011.png",
+      "brief": "Luna is a fictional 22-year-old woman. Wide awake curiosity with a playful slightly open smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "very-light",
+        "faceShape": "oval",
+        "nose": "small and straight",
+        "eyes": {
+          "color": "blue",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "chin-length bob with curved fringe",
+          "color": "pastel-pink",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "star-studs",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "zip-jacket",
+          "color": "lavender",
+          "accentColor": "mint"
+        },
+        "skinDetails": [
+          "freckles across cheeks"
+        ],
+        "expression": "Wide awake curiosity with a playful slightly open smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-012",
+      "name": "Nico",
+      "status": "planned",
+      "fileName": "sgw-012.png",
+      "brief": "Nico is a fictional 46-year-old man. Easygoing thoughtful expression with a small crooked grin.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "diamond",
+        "nose": "prominent and aquiline",
+        "eyes": {
+          "color": "hazel",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "shoulder-length locs tied loosely back",
+          "color": "dark-brown",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "goatee",
+          "color": "dark-brown"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "open-collar-shirt",
+          "color": "ochre",
+          "accentColor": "charcoal"
+        },
+        "skinDetails": [
+          "subtle smile lines"
+        ],
+        "expression": "Easygoing thoughtful expression with a small crooked grin."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-013",
+      "name": "Iris",
+      "status": "planned",
+      "fileName": "sgw-013.png",
+      "brief": "Iris is a fictional 57-year-old woman. Perceptive amused gaze and a warm small smile.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "feminine",
+        "skinTone": "very-light",
+        "faceShape": "square",
+        "nose": "long and straight",
+        "eyes": {
+          "color": "green",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "short soft curls",
+          "color": "grey",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "hexagonal",
+          "color": "matte-black"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "drop-earrings",
+          "color": "copper"
+        },
+        "outfit": {
+          "type": "knit-jacket",
+          "color": "petrol-blue",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "fine forehead lines"
+        ],
+        "expression": "Perceptive amused gaze and a warm small smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-014",
+      "name": "Theo",
+      "status": "planned",
+      "fileName": "sgw-014.png",
+      "brief": "Theo is a fictional 31-year-old man. Affable uncertain grin, eyebrows slightly raised as if weighing an idea.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "soft-square",
+        "nose": "short and rounded",
+        "eyes": {
+          "color": "green",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "messy short waves",
+          "color": "chestnut",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "stubble",
+          "color": "chestnut"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "baseball-cap",
+          "color": "denim-blue"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "overshirt",
+          "color": "rust",
+          "accentColor": "ivory"
+        },
+        "skinDetails": [
+          "light freckles"
+        ],
+        "expression": "Affable uncertain grin, eyebrows slightly raised as if weighing an idea."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-015",
+      "name": "Bea",
+      "status": "planned",
+      "fileName": "sgw-015.png",
+      "brief": "Bea is a fictional 76-year-old woman. Lively warm smile with a confident raised eyebrow.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "heart",
+        "nose": "broad with a rounded tip",
+        "eyes": {
+          "color": "grey",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "neat swept pixie",
+          "color": "white",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "button-studs",
+          "color": "emerald"
+        },
+        "outfit": {
+          "type": "silk-blouse",
+          "color": "deep-plum",
+          "accentColor": "emerald"
+        },
+        "skinDetails": [
+          "smile lines",
+          "fine eye wrinkles"
+        ],
+        "expression": "Lively warm smile with a confident raised eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-016",
+      "name": "Max",
+      "status": "planned",
+      "fileName": "sgw-016.png",
+      "brief": "Max is a fictional 25-year-old man. Open friendly grin, bright inquisitive eyes.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "medium-deep",
+        "faceShape": "round",
+        "nose": "broad with a low bridge",
+        "eyes": {
+          "color": "brown",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "short textured coils",
+          "color": "black",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "beanie",
+          "color": "mustard"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "hoodie",
+          "color": "cobalt",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "small cheek dimple"
+        ],
+        "expression": "Open friendly grin, bright inquisitive eyes."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-017",
+      "name": "Esme",
+      "status": "planned",
+      "fileName": "sgw-017.png",
+      "brief": "Esme is a fictional 44-year-old woman. Playfully challenging look, chin gently lifted, a slight smirk.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "deep",
+        "faceShape": "long",
+        "nose": "straight with a rounded tip",
+        "eyes": {
+          "color": "amber",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "long braids in a high ponytail",
+          "color": "blue-black",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "long-geometric",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "tailored-top",
+          "color": "emerald",
+          "accentColor": "charcoal"
+        },
+        "skinDetails": [
+          "small silver nose stud"
+        ],
+        "expression": "Playfully challenging look, chin gently lifted, a slight smirk."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-018",
+      "name": "Leo",
+      "status": "planned",
+      "fileName": "sgw-018.png",
+      "brief": "Leo is a fictional 61-year-old man. Warm thoughtful smile, relaxed heavy brows.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "square",
+        "nose": "large and gently hooked",
+        "eyes": {
+          "color": "hazel",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "shoulder-length swept waves",
+          "color": "salt-and-pepper",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "full-beard",
+          "color": "salt-and-pepper"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "corduroy-jacket",
+          "color": "olive",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "soft forehead lines"
+        ],
+        "expression": "Warm thoughtful smile, relaxed heavy brows."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-019",
+      "name": "Ruby",
+      "status": "planned",
+      "fileName": "sgw-019.png",
+      "brief": "Ruby is a fictional 36-year-old woman. Animated mischievous smile with one brow lifted.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "feminine",
+        "skinTone": "very-light",
+        "faceShape": "heart",
+        "nose": "small and upturned",
+        "eyes": {
+          "color": "green",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "long loose waves",
+          "color": "copper-red",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "headband",
+          "color": "cream"
+        },
+        "earrings": {
+          "style": "teardrops",
+          "color": "turquoise"
+        },
+        "outfit": {
+          "type": "knit-top",
+          "color": "navy",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "freckles on nose and cheeks"
+        ],
+        "expression": "Animated mischievous smile with one brow lifted."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-020",
+      "name": "Otto",
+      "status": "planned",
+      "fileName": "sgw-020.png",
+      "brief": "Otto is a fictional 70-year-old man. Calm amused expression with a tiny almost-secret smile.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "masculine",
+        "skinTone": "medium-deep",
+        "faceShape": "broad-oval",
+        "nose": "broad and rounded",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "bald head",
+          "color": null,
+          "texture": null
+        },
+        "facialHair": {
+          "style": "neat-moustache",
+          "color": "grey"
+        },
+        "glasses": {
+          "style": "rectangular",
+          "color": "gold"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-polo",
+          "color": "burgundy",
+          "accentColor": "oatmeal"
+        },
+        "skinDetails": [
+          "pronounced smile lines"
+        ],
+        "expression": "Calm amused expression with a tiny almost-secret smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-021",
+      "name": "Mae",
+      "status": "planned",
+      "fileName": "sgw-021.png",
+      "brief": "Mae is a fictional 29-year-old woman. Gentle curious gaze, head tilted very slightly, a welcoming smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "soft-square",
+        "nose": "short and straight",
+        "eyes": {
+          "color": "brown",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "short curls under headscarf",
+          "color": "dark-brown",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "headscarf",
+          "color": "forest-green"
+        },
+        "earrings": {
+          "style": "studs",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "linen-shirt",
+          "color": "cream",
+          "accentColor": "terracotta"
+        },
+        "skinDetails": [
+          "light freckles"
+        ],
+        "expression": "Gentle curious gaze, head tilted very slightly, a welcoming smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-022",
+      "name": "Ezra",
+      "status": "planned",
+      "fileName": "sgw-022.png",
+      "brief": "Ezra is a fictional 54-year-old man. Dry intellectual amusement with a sharply lifted brow.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "long",
+        "nose": "pronounced and aquiline",
+        "eyes": {
+          "color": "blue",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "thick loose curls",
+          "color": "salt-and-pepper",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "full-moustache",
+          "color": "dark-grey"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "velvet-jacket",
+          "color": "plum",
+          "accentColor": "charcoal"
+        },
+        "skinDetails": [
+          "fine lines between brows"
+        ],
+        "expression": "Dry intellectual amusement with a sharply lifted brow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-023",
+      "name": "June",
+      "status": "planned",
+      "fileName": "sgw-023.png",
+      "brief": "June is a fictional 65-year-old woman. Radiant grown-up confidence and a relaxed closed-mouth smile.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "very-deep",
+        "faceShape": "oval",
+        "nose": "broad and softly rounded",
+        "eyes": {
+          "color": "brown",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "short sculpted coils",
+          "color": "silver",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "cat-eye",
+          "color": "gold"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "hoops",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "linen-jacket",
+          "color": "coral",
+          "accentColor": "ivory"
+        },
+        "skinDetails": [
+          "fine smile lines"
+        ],
+        "expression": "Radiant grown-up confidence and a relaxed closed-mouth smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-024",
+      "name": "Arlo",
+      "status": "planned",
+      "fileName": "sgw-024.png",
+      "brief": "Arlo is a fictional 28-year-old man. Dreamy thoughtful look with a softly amused smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "diamond",
+        "nose": "long and straight",
+        "eyes": {
+          "color": "hazel",
+          "shape": "downturned"
+        },
+        "hair": {
+          "style": "loose small bun with flyaways",
+          "color": "dark-brown",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "stubble",
+          "color": "dark-brown"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "collared-shirt",
+          "color": "teal",
+          "accentColor": "sand"
+        },
+        "skinDetails": [
+          "small cheek dimple"
+        ],
+        "expression": "Dreamy thoughtful look with a softly amused smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-025",
+      "name": "Naomi",
+      "status": "planned",
+      "fileName": "sgw-025.png",
+      "brief": "Naomi is a fictional 41-year-old woman. Infectiously amused grin with expressive raised brows.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "deep",
+        "faceShape": "round",
+        "nose": "broad with a low bridge",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "rounded natural afro",
+          "color": "black",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "large-hoops",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "structured-top",
+          "color": "marigold",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "small beauty mark beside nose"
+        ],
+        "expression": "Infectiously amused grin with expressive raised brows."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-026",
+      "name": "Silas",
+      "status": "planned",
+      "fileName": "sgw-026.png",
+      "brief": "Silas is a fictional 77-year-old man. Patient watchful expression with a kindly crooked smile.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "long",
+        "nose": "short and rounded",
+        "eyes": {
+          "color": "hazel",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "short swept waves",
+          "color": "white",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "trimmed-full-beard",
+          "color": "white"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "wool-jacket",
+          "color": "slate-blue",
+          "accentColor": "ochre"
+        },
+        "skinDetails": [
+          "forehead lines",
+          "cheek wrinkles"
+        ],
+        "expression": "Patient watchful expression with a kindly crooked smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-027",
+      "name": "Ada",
+      "status": "planned",
+      "fileName": "sgw-027.png",
+      "brief": "Ada is a fictional 23-year-old woman. Bold energetic grin with an impish raised eyebrow.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "very-light",
+        "faceShape": "square",
+        "nose": "small and upturned",
+        "eyes": {
+          "color": "grey",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "cropped cut with micro fringe",
+          "color": "black",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "tiny-studs",
+          "color": "red"
+        },
+        "outfit": {
+          "type": "bomber-jacket",
+          "color": "cherry-red",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "freckles across nose"
+        ],
+        "expression": "Bold energetic grin with an impish raised eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-028",
+      "name": "Ravi",
+      "status": "planned",
+      "fileName": "sgw-028.png",
+      "brief": "Ravi is a fictional 37-year-old man. Warmly analytical gaze and a subtle confident smile.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "medium-deep",
+        "faceShape": "oval",
+        "nose": "strong and aquiline",
+        "eyes": {
+          "color": "amber",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "wavy undercut with a high textured top",
+          "color": "black",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "short-boxed-beard",
+          "color": "black"
+        },
+        "glasses": {
+          "style": "round",
+          "color": "tortoiseshell"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-polo",
+          "color": "cream",
+          "accentColor": "deep-green"
+        },
+        "skinDetails": [
+          "faint cheek dimple"
+        ],
+        "expression": "Warmly analytical gaze and a subtle confident smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-029",
+      "name": "Mina",
+      "status": "planned",
+      "fileName": "sgw-029.png",
+      "brief": "Mina is a fictional 58-year-old woman. Wry perceptive half-smile with one eyebrow raised.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "oval",
+        "nose": "small and straight",
+        "eyes": {
+          "color": "brown",
+          "shape": "upturned"
+        },
+        "hair": {
+          "style": "neat side-part bob",
+          "color": "silver-grey",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "button-studs",
+          "color": "copper"
+        },
+        "outfit": {
+          "type": "tailored-jacket",
+          "color": "peacock-blue",
+          "accentColor": "black"
+        },
+        "skinDetails": [
+          "fine crow's feet"
+        ],
+        "expression": "Wry perceptive half-smile with one eyebrow raised."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-030",
+      "name": "Bram",
+      "status": "planned",
+      "fileName": "sgw-030.png",
+      "brief": "Bram is a fictional 47-year-old man. Skeptical but friendly look with a broad lopsided smile.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "square",
+        "nose": "slightly crooked and prominent",
+        "eyes": {
+          "color": "blue",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "bald crown with short side hair",
+          "color": "ginger",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "full-moustache",
+          "color": "ginger"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "baseball-cap",
+          "color": "forest-green"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "work-shirt",
+          "color": "mustard",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "rosy cheeks"
+        ],
+        "expression": "Skeptical but friendly look with a broad lopsided smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-031",
+      "name": "Yara",
+      "status": "planned",
+      "fileName": "sgw-031.png",
+      "brief": "Yara is a fictional 69-year-old woman. Confident delighted smile and bright attentive eyes.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "deep",
+        "faceShape": "diamond",
+        "nose": "rounded with a broad tip",
+        "eyes": {
+          "color": "brown",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "braided crown",
+          "color": "white",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "large-rings",
+          "color": "turquoise"
+        },
+        "outfit": {
+          "type": "wrap-top",
+          "color": "royal-blue",
+          "accentColor": "terracotta"
+        },
+        "skinDetails": [
+          "soft eye wrinkles"
+        ],
+        "expression": "Confident delighted smile and bright attentive eyes."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-032",
+      "name": "Finn",
+      "status": "planned",
+      "fileName": "sgw-032.png",
+      "brief": "Finn is a fictional 21-year-old man. Enthusiastic slightly awkward grin, eyebrows raised in surprise.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "very-light",
+        "faceShape": "round",
+        "nose": "small and upturned",
+        "eyes": {
+          "color": "blue",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "floppy fringe with loose waves",
+          "color": "golden-blond",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "varsity-jacket",
+          "color": "forest-green",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "light freckles"
+        ],
+        "expression": "Enthusiastic slightly awkward grin, eyebrows raised in surprise."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-033",
+      "name": "Vera",
+      "status": "planned",
+      "fileName": "sgw-033.png",
+      "brief": "Vera is a fictional 33-year-old woman. Cool composed expression with a sly closed-mouth smile.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "heart",
+        "nose": "slim and aquiline",
+        "eyes": {
+          "color": "green",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "slicked-back cropped cut",
+          "color": "black",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "ear-cuff",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "tailored-blazer",
+          "color": "charcoal",
+          "accentColor": "violet"
+        },
+        "skinDetails": [
+          "small beauty mark under one eye"
+        ],
+        "expression": "Cool composed expression with a sly closed-mouth smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-034",
+      "name": "Idris",
+      "status": "planned",
+      "fileName": "sgw-034.png",
+      "brief": "Idris is a fictional 62-year-old man. Dignified warmth, a quietly amused smile visible within the beard.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "masculine",
+        "skinTone": "very-deep",
+        "faceShape": "square",
+        "nose": "broad and strong",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "bald head",
+          "color": null,
+          "texture": null
+        },
+        "facialHair": {
+          "style": "full-beard",
+          "color": "grey"
+        },
+        "glasses": {
+          "style": "square",
+          "color": "amber"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-cardigan",
+          "color": "chocolate",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "mature eye wrinkles"
+        ],
+        "expression": "Dignified warmth, a quietly amused smile visible within the beard."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-035",
+      "name": "Nora",
+      "status": "planned",
+      "fileName": "sgw-035.png",
+      "brief": "Nora is a fictional 75-year-old woman. Delighted mischievous expression with a tiny crooked grin.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "feminine",
+        "skinTone": "light",
+        "faceShape": "soft-square",
+        "nose": "narrow with a rounded tip",
+        "eyes": {
+          "color": "green",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "loose low bun",
+          "color": "white",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "beret",
+          "color": "lilac"
+        },
+        "earrings": {
+          "style": "pearl-studs",
+          "color": "ivory"
+        },
+        "outfit": {
+          "type": "wool-coat",
+          "color": "navy",
+          "accentColor": "lilac"
+        },
+        "skinDetails": [
+          "rosy cheeks",
+          "gentle smile lines"
+        ],
+        "expression": "Delighted mischievous expression with a tiny crooked grin."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-036",
+      "name": "Dante",
+      "status": "planned",
+      "fileName": "sgw-036.png",
+      "brief": "Dante is a fictional 43-year-old man. Quietly confident half-smile, one eyebrow raised.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "diamond",
+        "nose": "long and straight",
+        "eyes": {
+          "color": "blue",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "small low ponytail",
+          "color": "black",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "stubble",
+          "color": "black"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "small-hoop",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "open-collar-shirt",
+          "color": "salmon",
+          "accentColor": "charcoal"
+        },
+        "skinDetails": [
+          "fine smile lines"
+        ],
+        "expression": "Quietly confident half-smile, one eyebrow raised."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-037",
+      "name": "Rosa",
+      "status": "planned",
+      "fileName": "sgw-037.png",
+      "brief": "Rosa is a fictional 52-year-old woman. Bright hospitable smile and expressive curved brows.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "round",
+        "nose": "short and rounded",
+        "eyes": {
+          "color": "amber",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "shoulder-length curls",
+          "color": "chestnut",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "large-hoops",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "linen-blouse",
+          "color": "teal",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "smile lines",
+          "small beauty mark on chin"
+        ],
+        "expression": "Bright hospitable smile and expressive curved brows."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-038",
+      "name": "Ellis",
+      "status": "planned",
+      "fileName": "sgw-038.png",
+      "brief": "Ellis is a fictional 26-year-old man. Curious pensive expression with a playful uneven smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "very-light",
+        "faceShape": "long",
+        "nose": "slim and straight",
+        "eyes": {
+          "color": "brown",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "messy short waves",
+          "color": "teal",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "rectangular",
+          "color": "clear"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "denim-jacket",
+          "color": "indigo",
+          "accentColor": "mustard"
+        },
+        "skinDetails": [
+          "light freckles"
+        ],
+        "expression": "Curious pensive expression with a playful uneven smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-039",
+      "name": "Sana",
+      "status": "planned",
+      "fileName": "sgw-039.png",
+      "brief": "Sana is a fictional 66-year-old woman. Warm measured skepticism, one eyebrow lifted above a small smile.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "square",
+        "nose": "prominent with a rounded tip",
+        "eyes": {
+          "color": "green",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "half-up waves under a loose scarf",
+          "color": "silver",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "headscarf",
+          "color": "blue"
+        },
+        "earrings": {
+          "style": "small-hoops",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "collared-blouse",
+          "color": "cream",
+          "accentColor": "blue"
+        },
+        "skinDetails": [
+          "subtle crow's feet"
+        ],
+        "expression": "Warm measured skepticism, one eyebrow lifted above a small smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-040",
+      "name": "Remy",
+      "status": "planned",
+      "fileName": "sgw-040.png",
+      "brief": "Remy is a fictional 38-year-old man. Easygoing affable smile, slightly sleepy intelligent eyes.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "medium-light",
+        "faceShape": "heart",
+        "nose": "narrow and straight",
+        "eyes": {
+          "color": "hazel",
+          "shape": "downturned"
+        },
+        "hair": {
+          "style": "short swept-back waves",
+          "color": "dark-blond",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "light-stubble",
+          "color": "dark-blond"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-shirt",
+          "color": "dusty-rose",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "faint dimples"
+        ],
+        "expression": "Easygoing affable smile, slightly sleepy intelligent eyes."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-041",
+      "name": "Tessa",
+      "status": "planned",
+      "fileName": "sgw-041.png",
+      "brief": "Tessa is a fictional 45-year-old woman. Direct lively gaze and a self-assured crooked grin.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "light",
+        "faceShape": "broad-oval",
+        "nose": "short with a broad bridge",
+        "eyes": {
+          "color": "blue",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "side-shaved style with a long braid",
+          "color": "dark-auburn",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "geometric-studs",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "leather-jacket",
+          "color": "dark-green",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "small eyebrow scar",
+          "freckles"
+        ],
+        "expression": "Direct lively gaze and a self-assured crooked grin."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-042",
+      "name": "Omar",
+      "status": "planned",
+      "fileName": "sgw-042.png",
+      "brief": "Omar is a fictional 74-year-old man. Gentle amused squint and a broad kind smile.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "masculine",
+        "skinTone": "deep",
+        "faceShape": "round",
+        "nose": "large and broad",
+        "eyes": {
+          "color": "brown",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "short soft curls",
+          "color": "white",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "rounded-full-beard",
+          "color": "white"
+        },
+        "glasses": {
+          "style": "rimless",
+          "color": "silver"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "wool-vest",
+          "color": "camel",
+          "accentColor": "burgundy"
+        },
+        "skinDetails": [
+          "deep smile lines"
+        ],
+        "expression": "Gentle amused squint and a broad kind smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-043",
+      "name": "Dalia",
+      "status": "planned",
+      "fileName": "sgw-043.png",
+      "brief": "Dalia is a fictional 27-year-old woman. Alert curious expression with a quietly daring half-smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "deep",
+        "faceShape": "diamond",
+        "nose": "small and rounded",
+        "eyes": {
+          "color": "hazel",
+          "shape": "upturned"
+        },
+        "hair": {
+          "style": "long braids gathered high",
+          "color": "black",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "headwrap",
+          "color": "chartreuse"
+        },
+        "earrings": {
+          "style": "long-drops",
+          "color": "brass"
+        },
+        "outfit": {
+          "type": "structured-top",
+          "color": "terracotta",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "small cheek dimple"
+        ],
+        "expression": "Alert curious expression with a quietly daring half-smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-044",
+      "name": "Jude",
+      "status": "planned",
+      "fileName": "sgw-044.png",
+      "brief": "Jude is a fictional 56-year-old man. Deadpan amused look with a tiny raised corner of the mouth.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "masculine",
+        "skinTone": "medium-light",
+        "faceShape": "long",
+        "nose": "prominent and gently hooked",
+        "eyes": {
+          "color": "grey",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "short swept quiff",
+          "color": "salt-and-pepper",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "pencil-moustache",
+          "color": "dark-grey"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "collared-shirt",
+          "color": "magenta",
+          "accentColor": "charcoal"
+        },
+        "skinDetails": [
+          "fine lines around eyes"
+        ],
+        "expression": "Deadpan amused look with a tiny raised corner of the mouth."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-045",
+      "name": "Alma",
+      "status": "planned",
+      "fileName": "sgw-045.png",
+      "brief": "Alma is a fictional 71-year-old woman. Sincere warm smile and lively inquisitive eyes.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "feminine",
+        "skinTone": "medium",
+        "faceShape": "heart",
+        "nose": "small and straight",
+        "eyes": {
+          "color": "brown",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "chin-length soft waves",
+          "color": "silver",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "pearl-drops",
+          "color": "cream"
+        },
+        "outfit": {
+          "type": "striped-blouse",
+          "color": "navy",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "fine forehead and smile lines"
+        ],
+        "expression": "Sincere warm smile and lively inquisitive eyes."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-046",
+      "name": "Luca",
+      "status": "planned",
+      "fileName": "sgw-046.png",
+      "brief": "Luca is a fictional 32-year-old man. Cheeky conspiratorial grin and a slightly cocked eyebrow.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "medium-light",
+        "faceShape": "square",
+        "nose": "short and upturned",
+        "eyes": {
+          "color": "green",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "choppy short crop",
+          "color": "ginger",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "stubble",
+          "color": "ginger"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "beanie",
+          "color": "plum"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "overshirt",
+          "color": "ochre",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "freckles"
+        ],
+        "expression": "Cheeky conspiratorial grin and a slightly cocked eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-047",
+      "name": "Anika",
+      "status": "planned",
+      "fileName": "sgw-047.png",
+      "brief": "Anika is a fictional 48-year-old woman. Confident thoughtful expression with a restrained amused smile.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "oval",
+        "nose": "broad and straight",
+        "eyes": {
+          "color": "amber",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "long sleek side-part hair",
+          "color": "dark-brown",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "rectangular",
+          "color": "emerald"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "small-studs",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "tailored-blazer",
+          "color": "navy",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "soft smile lines"
+        ],
+        "expression": "Confident thoughtful expression with a restrained amused smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-048",
+      "name": "Basil",
+      "status": "planned",
+      "fileName": "sgw-048.png",
+      "brief": "Basil is a fictional 24-year-old man. Wide genuine grin and bright relaxed eyes.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "very-deep",
+        "faceShape": "round",
+        "nose": "broad and rounded",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "short twisted crop with pale tips",
+          "color": "black-and-blond",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "track-jacket",
+          "color": "sky-blue",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "one pronounced smile dimple"
+        ],
+        "expression": "Wide genuine grin and bright relaxed eyes."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-049",
+      "name": "Cora",
+      "status": "planned",
+      "fileName": "sgw-049.png",
+      "brief": "Cora is a fictional 63-year-old woman. Perceptive friendly gaze, mouth curled into a thoughtful smile.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "light",
+        "faceShape": "long",
+        "nose": "long and gently curved",
+        "eyes": {
+          "color": "green",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "swept pixie",
+          "color": "white",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "oval",
+          "color": "copper"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "small-studs",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "knit-top",
+          "color": "forest-green",
+          "accentColor": "rust"
+        },
+        "skinDetails": [
+          "freckles",
+          "fine eye lines"
+        ],
+        "expression": "Perceptive friendly gaze, mouth curled into a thoughtful smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-050",
+      "name": "Malik",
+      "status": "planned",
+      "fileName": "sgw-050.png",
+      "brief": "Malik is a fictional 35-year-old man. Calm self-assured expression with a playful side smile.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "deep",
+        "faceShape": "square",
+        "nose": "strong and aquiline",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "locs gathered in a low bun",
+          "color": "black",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "short-beard",
+          "color": "black"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "small-ear-cuff",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "tailored-jacket",
+          "color": "navy",
+          "accentColor": "ochre"
+        },
+        "skinDetails": [
+          "subtle cheek scar"
+        ],
+        "expression": "Calm self-assured expression with a playful side smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-051",
+      "name": "Elsa",
+      "status": "planned",
+      "fileName": "sgw-051.png",
+      "brief": "Elsa is a fictional 78-year-old woman. Witty delighted grin and an inquisitive raised eyebrow.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "feminine",
+        "skinTone": "very-light",
+        "faceShape": "round",
+        "nose": "small and rounded",
+        "eyes": {
+          "color": "blue",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "fine chin-length bob",
+          "color": "silver",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "cat-eye",
+          "color": "red"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "pearl-studs",
+          "color": "cream"
+        },
+        "outfit": {
+          "type": "knit-cardigan",
+          "color": "lavender",
+          "accentColor": "ivory"
+        },
+        "skinDetails": [
+          "rosy cheeks",
+          "expressive eye wrinkles"
+        ],
+        "expression": "Witty delighted grin and an inquisitive raised eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-052",
+      "name": "Hector",
+      "status": "planned",
+      "fileName": "sgw-052.png",
+      "brief": "Hector is a fictional 49-year-old man. Slightly skeptical thoughtful gaze and an easy half-smile.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "square",
+        "nose": "long with a strong bridge",
+        "eyes": {
+          "color": "brown",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "short dense curls with silver temples",
+          "color": "dark-brown",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "goatee",
+          "color": "dark-brown"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "work-jacket",
+          "color": "olive",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "fine forehead lines"
+        ],
+        "expression": "Slightly skeptical thoughtful gaze and an easy half-smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-053",
+      "name": "Ines",
+      "status": "planned",
+      "fileName": "sgw-053.png",
+      "brief": "Ines is a fictional 30-year-old woman. Animated friendly smile and raised expressive brows.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "feminine",
+        "skinTone": "medium",
+        "faceShape": "diamond",
+        "nose": "slim and straight",
+        "eyes": {
+          "color": "green",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "loose shoulder-length curls",
+          "color": "dark-brown",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "large-geometric",
+          "color": "teal"
+        },
+        "outfit": {
+          "type": "collared-top",
+          "color": "mustard",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "small beauty mark on cheek"
+        ],
+        "expression": "Animated friendly smile and raised expressive brows."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-054",
+      "name": "Tobias",
+      "status": "planned",
+      "fileName": "sgw-054.png",
+      "brief": "Tobias is a fictional 67-year-old man. Warmly gruff expression with a bemused closed-mouth smile.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "masculine",
+        "skinTone": "very-light",
+        "faceShape": "broad-square",
+        "nose": "large and bulbous",
+        "eyes": {
+          "color": "blue",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "neat side-part hair",
+          "color": "platinum-grey",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "short-beard",
+          "color": "grey"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "flat-cap",
+          "color": "brown"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "waxed-jacket",
+          "color": "olive",
+          "accentColor": "oatmeal"
+        },
+        "skinDetails": [
+          "ruddy cheeks",
+          "eye wrinkles"
+        ],
+        "expression": "Warmly gruff expression with a bemused closed-mouth smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-055",
+      "name": "Leila",
+      "status": "planned",
+      "fileName": "sgw-055.png",
+      "brief": "Leila is a fictional 55-year-old woman. Calm knowing gaze with a gentle playful smile.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "oval",
+        "nose": "small with a rounded tip",
+        "eyes": {
+          "color": "brown",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "long loose waves under a scarf",
+          "color": "salt-and-pepper",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "headscarf",
+          "color": "plum"
+        },
+        "earrings": {
+          "style": "hoops",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "linen-blouse",
+          "color": "sand",
+          "accentColor": "plum"
+        },
+        "skinDetails": [
+          "subtle smile lines"
+        ],
+        "expression": "Calm knowing gaze with a gentle playful smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-056",
+      "name": "Axel",
+      "status": "planned",
+      "fileName": "sgw-056.png",
+      "brief": "Axel is a fictional 22-year-old man. Impish curious smirk, head slightly tilted.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "heart",
+        "nose": "small and upturned",
+        "eyes": {
+          "color": "blue",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "short textured mohawk with dark roots",
+          "color": "platinum-blond",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "bomber-jacket",
+          "color": "charcoal",
+          "accentColor": "orange"
+        },
+        "skinDetails": [
+          "small eyebrow piercing"
+        ],
+        "expression": "Impish curious smirk, head slightly tilted."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-057",
+      "name": "Greta",
+      "status": "planned",
+      "fileName": "sgw-057.png",
+      "brief": "Greta is a fictional 40-year-old woman. Warm open smile with slightly raised questioning brows.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "round",
+        "nose": "broad and softly rounded",
+        "eyes": {
+          "color": "hazel",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "loose crown braid",
+          "color": "dark-blond",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "round",
+          "color": "tortoiseshell"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "tiny-studs",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "knit-sweater",
+          "color": "rust",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "light freckles"
+        ],
+        "expression": "Warm open smile with slightly raised questioning brows."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-058",
+      "name": "Nils",
+      "status": "planned",
+      "fileName": "sgw-058.png",
+      "brief": "Nils is a fictional 72-year-old man. Dry kindly amusement, eyes narrowed slightly above a small grin.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "masculine",
+        "skinTone": "deep",
+        "faceShape": "long",
+        "nose": "prominent and aquiline",
+        "eyes": {
+          "color": "grey",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "short tight coils",
+          "color": "white",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "full-moustache",
+          "color": "white"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "flat-cap",
+          "color": "forest-green"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "wool-jacket",
+          "color": "chocolate",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "fine forehead lines",
+          "smile creases"
+        ],
+        "expression": "Dry kindly amusement, eyes narrowed slightly above a small grin."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-059",
+      "name": "Mara",
+      "status": "planned",
+      "fileName": "sgw-059.png",
+      "brief": "Mara is a fictional 28-year-old woman. Playful thoughtful expression with an asymmetric smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "medium-light",
+        "faceShape": "long",
+        "nose": "slim and straight",
+        "eyes": {
+          "color": "amber",
+          "shape": "upturned"
+        },
+        "hair": {
+          "style": "textured cropped pixie",
+          "color": "violet",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "tiny-hoops",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "hoodie",
+          "color": "pale-grey",
+          "accentColor": "violet"
+        },
+        "skinDetails": [
+          "small beauty mark below eye"
+        ],
+        "expression": "Playful thoughtful expression with an asymmetric smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-060",
+      "name": "Quinn",
+      "status": "planned",
+      "fileName": "sgw-060.png",
+      "brief": "Quinn is a fictional 59-year-old man. Relaxed friendly grin with a slightly skeptical eyebrow.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "round",
+        "nose": "broad and rounded",
+        "eyes": {
+          "color": "green",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "long waves loosely tied back",
+          "color": "silver-grey",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "stubble",
+          "color": "grey"
+        },
+        "glasses": {
+          "style": "rectangular",
+          "color": "blue"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "linen-shirt",
+          "color": "cream",
+          "accentColor": "teal"
+        },
+        "skinDetails": [
+          "soft cheek and eye lines"
+        ],
+        "expression": "Relaxed friendly grin with a slightly skeptical eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-061",
+      "name": "Petra",
+      "status": "planned",
+      "fileName": "sgw-061.png",
+      "brief": "Petra is a fictional 64-year-old woman. Confident sharp-eyed half-smile with an amused raised brow.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "light",
+        "faceShape": "square",
+        "nose": "long and aquiline",
+        "eyes": {
+          "color": "blue",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "chin-length side-part bob",
+          "color": "silver",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "fedora",
+          "color": "burgundy"
+        },
+        "earrings": {
+          "style": "geometric-studs",
+          "color": "silver"
+        },
+        "outfit": {
+          "type": "tailored-coat",
+          "color": "deep-teal",
+          "accentColor": "burgundy"
+        },
+        "skinDetails": [
+          "light freckles",
+          "fine smile lines"
+        ],
+        "expression": "Confident sharp-eyed half-smile with an amused raised brow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-062",
+      "name": "Elias",
+      "status": "planned",
+      "fileName": "sgw-062.png",
+      "brief": "Elias is a fictional 34-year-old man. Thoughtful gentle expression and a warm subtle smile.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "oval",
+        "nose": "narrow and straight",
+        "eyes": {
+          "color": "brown",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "shoulder-length curls",
+          "color": "black",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "full-beard",
+          "color": "black"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-top",
+          "color": "mustard",
+          "accentColor": "charcoal"
+        },
+        "skinDetails": [
+          "small cheek dimple"
+        ],
+        "expression": "Thoughtful gentle expression and a warm subtle smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-063",
+      "name": "Nia",
+      "status": "planned",
+      "fileName": "sgw-063.png",
+      "brief": "Nia is a fictional 46-year-old woman. Vivid confident grin and a knowingly lifted eyebrow.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "feminine",
+        "skinTone": "very-deep",
+        "faceShape": "heart",
+        "nose": "broad and softly rounded",
+        "eyes": {
+          "color": "dark-brown",
+          "shape": "wide-set"
+        },
+        "hair": {
+          "style": "sculpted natural coils with a white streak",
+          "color": "black-and-white",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "large-geometric",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "structured-jacket",
+          "color": "yellow",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "small beauty mark beside mouth"
+        ],
+        "expression": "Vivid confident grin and a knowingly lifted eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-064",
+      "name": "Soren",
+      "status": "planned",
+      "fileName": "sgw-064.png",
+      "brief": "Soren is a fictional 79-year-old man. Gentle dry humor, lips curved in a small patient smile.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "masculine",
+        "skinTone": "very-light",
+        "faceShape": "long",
+        "nose": "long and gently hooked",
+        "eyes": {
+          "color": "blue",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "bald crown with fine side hair",
+          "color": "white",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "pointed-goatee",
+          "color": "white"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "wool-cardigan",
+          "color": "slate",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "pronounced forehead and eye wrinkles"
+        ],
+        "expression": "Gentle dry humor, lips curved in a small patient smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-065",
+      "name": "Zoe",
+      "status": "planned",
+      "fileName": "sgw-065.png",
+      "brief": "Zoe is a fictional 20-year-old woman. Bright slightly surprised smile, full of curious energy.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "feminine",
+        "skinTone": "light",
+        "faceShape": "heart",
+        "nose": "small and upturned",
+        "eyes": {
+          "color": "green",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "short curly bob",
+          "color": "copper-red",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "button-studs",
+          "color": "sky-blue"
+        },
+        "outfit": {
+          "type": "denim-jacket",
+          "color": "light-blue",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "freckles"
+        ],
+        "expression": "Bright slightly surprised smile, full of curious energy."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-066",
+      "name": "Mateo",
+      "status": "planned",
+      "fileName": "sgw-066.png",
+      "brief": "Mateo is a fictional 51-year-old man. Quiet assured charm, a tiny lopsided closed-mouth smile.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "masculine",
+        "skinTone": "medium",
+        "faceShape": "square",
+        "nose": "prominent and aquiline",
+        "eyes": {
+          "color": "brown",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "short sculpted waves with grey sides",
+          "color": "black",
+          "texture": "wavy"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "suede-jacket",
+          "color": "camel",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "fine smile lines",
+          "small chin dimple"
+        ],
+        "expression": "Quiet assured charm, a tiny lopsided closed-mouth smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-067",
+      "name": "Selma",
+      "status": "planned",
+      "fileName": "sgw-067.png",
+      "brief": "Selma is a fictional 73-year-old woman. Warm witty gaze with a small conspiratorial smile.",
+      "intendedTraits": {
+        "ageBand": "70s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "round",
+        "nose": "broad with a rounded tip",
+        "eyes": {
+          "color": "brown",
+          "shape": "hooded"
+        },
+        "hair": {
+          "style": "short curls tucked under turban",
+          "color": "white",
+          "texture": "curly"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "square",
+          "color": "gold"
+        },
+        "headwear": {
+          "style": "turban",
+          "color": "navy"
+        },
+        "earrings": {
+          "style": "small-hoops",
+          "color": "gold"
+        },
+        "outfit": {
+          "type": "knit-jacket",
+          "color": "raspberry",
+          "accentColor": "navy"
+        },
+        "skinDetails": [
+          "mature smile lines"
+        ],
+        "expression": "Warm witty gaze with a small conspiratorial smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-068",
+      "name": "Leon",
+      "status": "planned",
+      "fileName": "sgw-068.png",
+      "brief": "Leon is a fictional 45-year-old man. Friendly self-assured grin with a gently cocked eyebrow.",
+      "intendedTraits": {
+        "ageBand": "40s",
+        "presentation": "masculine",
+        "skinTone": "very-light",
+        "faceShape": "round",
+        "nose": "straight with a broad tip",
+        "eyes": {
+          "color": "hazel",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "shaved head",
+          "color": null,
+          "texture": null
+        },
+        "facialHair": {
+          "style": "short-boxed-beard",
+          "color": "dark-brown"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "hoodie",
+          "color": "charcoal",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "small cheek scar",
+          "strong smile dimples"
+        ],
+        "expression": "Friendly self-assured grin with a gently cocked eyebrow."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-069",
+      "name": "Asha",
+      "status": "planned",
+      "fileName": "sgw-069.png",
+      "brief": "Asha is a fictional 60-year-old woman. Thoughtful warmth, a patient smile and attentive gaze.",
+      "intendedTraits": {
+        "ageBand": "60s",
+        "presentation": "feminine",
+        "skinTone": "medium-deep",
+        "faceShape": "oval",
+        "nose": "short and upturned",
+        "eyes": {
+          "color": "hazel",
+          "shape": "almond"
+        },
+        "hair": {
+          "style": "long loose braids",
+          "color": "silver-grey",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "stacked-studs",
+          "color": "copper"
+        },
+        "outfit": {
+          "type": "collared-blouse",
+          "color": "terracotta",
+          "accentColor": "ivory"
+        },
+        "skinDetails": [
+          "soft eye wrinkles"
+        ],
+        "expression": "Thoughtful warmth, a patient smile and attentive gaze."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-070",
+      "name": "Casper",
+      "status": "planned",
+      "fileName": "sgw-070.png",
+      "brief": "Casper is a fictional 26-year-old man. Earnest curious look, lips almost breaking into a smile.",
+      "intendedTraits": {
+        "ageBand": "20s",
+        "presentation": "masculine",
+        "skinTone": "light",
+        "faceShape": "long",
+        "nose": "long with a broad tip",
+        "eyes": {
+          "color": "blue",
+          "shape": "round"
+        },
+        "hair": {
+          "style": "messy bowl cut with a loose fringe",
+          "color": "chestnut",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "round",
+          "color": "ink-black"
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "knit-vest",
+          "color": "mint",
+          "accentColor": "cream"
+        },
+        "skinDetails": [
+          "light freckles"
+        ],
+        "expression": "Earnest curious look, lips almost breaking into a smile."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-071",
+      "name": "Dina",
+      "status": "planned",
+      "fileName": "sgw-071.png",
+      "brief": "Dina is a fictional 39-year-old woman. Lively wry smile and expressive arched eyebrows.",
+      "intendedTraits": {
+        "ageBand": "30s",
+        "presentation": "feminine",
+        "skinTone": "medium",
+        "faceShape": "soft-square",
+        "nose": "short and rounded",
+        "eyes": {
+          "color": "amber",
+          "shape": "upturned"
+        },
+        "hair": {
+          "style": "asymmetric chin-length bob",
+          "color": "black",
+          "texture": "straight"
+        },
+        "facialHair": {
+          "style": "none",
+          "color": null
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "none",
+          "color": null
+        },
+        "earrings": {
+          "style": "button-studs",
+          "color": "red"
+        },
+        "outfit": {
+          "type": "structured-top",
+          "color": "cream",
+          "accentColor": "scarlet"
+        },
+        "skinDetails": [
+          "small beauty mark near chin"
+        ],
+        "expression": "Lively wry smile and expressive arched eyebrows."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    },
+    {
+      "id": "sgw-072",
+      "name": "Ronan",
+      "status": "planned",
+      "fileName": "sgw-072.png",
+      "brief": "Ronan is a fictional 57-year-old man. Warm knowing closed-mouth grin with a relaxed confident gaze.",
+      "intendedTraits": {
+        "ageBand": "50s",
+        "presentation": "masculine",
+        "skinTone": "deep",
+        "faceShape": "broad-square",
+        "nose": "strong and gently hooked",
+        "eyes": {
+          "color": "hazel",
+          "shape": "deep-set"
+        },
+        "hair": {
+          "style": "short textured coils",
+          "color": "salt-and-pepper",
+          "texture": "coily"
+        },
+        "facialHair": {
+          "style": "trimmed-full-beard",
+          "color": "salt-and-pepper"
+        },
+        "glasses": {
+          "style": "none",
+          "color": null
+        },
+        "headwear": {
+          "style": "flat-cap",
+          "color": "mustard"
+        },
+        "earrings": {
+          "style": "none",
+          "color": null
+        },
+        "outfit": {
+          "type": "corduroy-jacket",
+          "color": "navy",
+          "accentColor": "rust"
+        },
+        "skinDetails": [
+          "soft smile lines",
+          "one cheek dimple"
+        ],
+        "expression": "Warm knowing closed-mouth grin with a relaxed confident gaze."
+      },
+      "observedTraits": null,
+      "altText": null,
+      "generation": {
+        "tool": null,
+        "model": null,
+        "seed": null,
+        "styleReference": null,
+        "generatedAt": null
+      },
+      "image": {
+        "width": null,
+        "height": null,
+        "sha256": null
+      },
+      "review": {
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": ""
+      }
+    }
+  ]
+}
