@@ -122,6 +122,21 @@ export const REACTIONS = [
   '😏',
   '🤝',
 ] as const
+
+export const REACTION_CHOICES = [
+  { emoji: '😂', label: 'Laugh' },
+  { emoji: '❤️', label: 'Love' },
+  { emoji: '👍', label: 'Thumbs up' },
+  { emoji: '👏', label: 'Applause' },
+  { emoji: '🤔', label: 'Thinking' },
+  { emoji: '👀', label: 'Curious' },
+  { emoji: '😮', label: 'Surprised' },
+  { emoji: '😅', label: 'Nervous laugh' },
+  { emoji: '😎', label: 'Cool' },
+  { emoji: '🙈', label: 'Embarrassed' },
+  { emoji: '🔥', label: 'Fire' },
+  { emoji: '💀', label: 'Skull' },
+] as const satisfies readonly { emoji: (typeof REACTIONS)[number]; label: string }[]
 export interface SubscriptionCallbacks {
   invalidate: (version?: number) => void
   connection: (status: Connection) => void

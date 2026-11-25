@@ -144,21 +144,23 @@ for (const outcome of ['cancel', 'match', 'requeue', 'leave-queue'])
     } else {
       await page.reload()
       await expect(page.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
-      await expect(page.locator('.play-status')).toContainText('Bob')
+      await expect(page.getByRole('banner')).toContainText('Bob')
       expect(pulses).toBeGreaterThan(0)
       if (outcome === 'requeue' || outcome === 'leave-queue') {
         noShow = true
         await page.reload()
         await expect(page.getByRole('heading', { name: 'Game ended.' })).toBeVisible()
         await page.clock.runFor(10_100)
-        await expect(page.getByRole('status')).toContainText('Finding another player')
+        await expect(
+          page.getByRole('status').filter({ hasText: 'Finding another player' }),
+        ).toBeVisible()
         await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0)
         await expect(page.getByRole('dialog')).toHaveCount(0)
         if (outcome === 'requeue') {
           await page.clock.runFor(10_100)
           await expect(page).toHaveURL(new RegExp(nextRoom))
           await expect(page.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
-          await expect(page.locator('.play-status')).toContainText('Casey')
+          await expect(page.getByRole('banner')).toContainText('Casey')
         } else {
           await page.getByRole('button', { name: 'Game menu', exact: true }).click()
           await page.getByRole('button', { name: 'Leave game', exact: true }).click()

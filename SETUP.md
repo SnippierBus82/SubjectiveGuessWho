@@ -46,9 +46,13 @@ Get the Supabase keys from the project's **API Keys** settings. Keep all secrets
 
 Import the repository in Vercel and select its root. The checked-in [`vercel.json`](vercel.json) configures Vite, the `dist` output, and the `/api/boards` function. Use Node.js 22 or later and deploy after the database and environment setup.
 
+Apply all pending database migrations before deploying a client update. The 75-character question limit requires the matching database migration for online play.
+
 1. Open `/api/boards` on the deployed site. A browser GET should return HTTP 405 with `{"error":"Use POST."}`. If Vercel returns a 500, look for the `/api/boards` exception in **Logs**.
 2. Create a game and join the invitation from a second browser profile or device. Confirm both players see the same faces and order, including after refresh.
 3. Ready both players, ask and answer, make a final guess, and rematch. Try **Find a player** from both profiles on the same board.
 4. Exercise sign-up, recovery, and CAPTCHA with the deployed hostname if enabled.
 
-Each user can create up to 20 online rooms per clock hour. Rooms expire after 24 hours of inactivity and are deleted on the next hourly cleanup run. To enable automatic deletion, enable `pg_cron` and run [`supabase/maintenance.sql`](supabase/maintenance.sql) in the Supabase SQL editor.
+Each user can create up to 20 online rooms per clock hour. If any activity timer is Unlimited, disconnects leave the game running. Finite timers in that room still expire normally.
+
+Rooms expire after 24 hours without server activity and are deleted on the next hourly cleanup run. Heartbeats from a visible, connected game keep the room active. To enable automatic deletion, enable `pg_cron` and run [`supabase/maintenance.sql`](supabase/maintenance.sql) in the Supabase SQL editor. Verify that the hourly `sgw-retention` job is active before deploying the client.

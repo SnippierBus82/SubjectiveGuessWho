@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import {
-  ArrowRight,
   Check,
   CheckCheck,
   Clock3,
@@ -8,9 +7,9 @@ import {
   Expand,
   Flag,
   History,
+  Lightbulb,
   LoaderCircle,
   LockKeyhole,
-  MessageCircle,
   Menu,
   RotateCcw,
   Send,
@@ -20,14 +19,13 @@ import {
   Users,
   Volume2,
   VolumeX,
-  Wifi,
   WifiOff,
   X,
 } from 'lucide-react'
 import type { Character } from '../game/board-model'
-import { timeLabel } from '../game/timings'
 import { boardInfo } from '../game/boards'
-import { REACTIONS } from '../game/types'
+import { characterCount, MAX_QUESTION, secondsRemaining, trimQuestion } from '../game/rules'
+import { REACTION_CHOICES } from '../game/types'
 import type { GameController } from '../hooks/useGame'
 import { copyText, invitation, storage } from '../lib/platform'
 import { CharacterBoard, Portrait } from './CharacterBoard'
@@ -45,38 +43,68 @@ function useNow() {
   }, [])
   return now
 }
-function Clock({ deadline, now, label }: { deadline: string | null; now: number; label: string }) {
-  const left = deadline ? Math.max(0, Math.ceil((Date.parse(deadline) - now) / 1000)) : null
+function Clock({ seconds, owner }: { seconds: number; owner: string }) {
   return (
     <span
-      className={`phase-clock ${left !== null && left <= 10 ? 'clock-soon' : ''}`}
+      className={`phase-clock ${seconds <= 10 ? 'clock-soon' : ''}`}
       role="timer"
-      aria-label={`${label}: ${left === null ? 'unlimited' : `${left} seconds remaining`}`}
+      aria-label={`${owner}: ${seconds} seconds remaining`}
     >
-      <Clock3 size={15} />
-      {left === null ? '∞' : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`}
+      <Clock3 size={15} aria-hidden="true" />
+      <span>{owner}</span>
+      <strong>{`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`}</strong>
     </span>
   )
 }
 export function GameRoom({ controller }: { controller: GameController }) {
   const [menu, setMenu] = useState(false)
+  const [inviteStatus, setInviteStatus] = useState<'copied' | 'failed' | null>(null)
+  const code = controller.state!.code
+  useEffect(() => setInviteStatus(null), [code])
   useEffect(() => {
     const open = () => setMenu(true)
     window.addEventListener('sgw:open-game-menu', open)
     return () => window.removeEventListener('sgw:open-game-menu', open)
   }, [])
+  async function copyInvite() {
+    try {
+      await copyText(invitation(code))
+      setInviteStatus('copied')
+    } catch {
+      setInviteStatus('failed')
+    }
+  }
   return (
     <>
       <Room
         key={controller.state!.game.id + controller.state!.you}
         controller={controller}
         onMenu={() => setMenu(true)}
+        onCopyInvite={copyInvite}
+        inviteStatus={inviteStatus}
       />
-      {menu && <GameMenu controller={controller} onClose={() => setMenu(false)} />}
+      {menu && (
+        <GameMenu
+          controller={controller}
+          onClose={() => setMenu(false)}
+          onCopyInvite={copyInvite}
+          inviteStatus={inviteStatus}
+        />
+      )}
     </>
   )
 }
-function Room({ controller, onMenu }: { controller: GameController; onMenu: () => void }) {
+function Room({
+  controller,
+  onMenu,
+  onCopyInvite,
+  inviteStatus,
+}: {
+  controller: GameController
+  onMenu: () => void
+  onCopyInvite: () => Promise<void>
+  inviteStatus: 'copied' | 'failed' | null
+}) {
   const s = controller.state!,
     g = s.game,
     flow = g.flow,
@@ -87,7 +115,6 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
   const now = useNow() + controller.clockOffset
   const key = `${s.roomId}:${g.id}:${s.you}`
   const boardRef = useRef<HTMLDivElement>(null)
-  const boardPosition = useRef(storage.read<number>(`board-scroll:${key}`, 0))
   const [eliminated, setEliminated] = useState<string[]>(
     () => storage.read<unknown>(`eliminated:${key}`, []) as string[],
   )
@@ -95,7 +122,7 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
     ? eliminated.filter((id) => board.some((c) => c.id === id))
     : []
   const [draft, setDraft] = useState(() => storage.read<string>(`draft:${key}`, ''))
-  const [sheet, setSheet] = useState<'history' | 'emoji' | 'rules' | 'portrait' | 'guess' | null>(
+  const [sheet, setSheet] = useState<'history' | 'emoji' | 'ideas' | 'portrait' | 'guess' | null>(
     null,
   )
   const [inspected, setInspected] = useState<Character | null>(null)
@@ -106,9 +133,7 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
     height: window.visualViewport?.height ?? window.innerHeight,
     width: window.innerWidth,
   })
-  const [focused, setFocused] = useState(false),
-    [copied, setCopied] = useState(false),
-    [copyFailed, setCopyFailed] = useState(false)
+  const questionInput = useRef<HTMLTextAreaElement>(null)
   const [saveFailed, setSaveFailed] = useState(false),
     [cooldown, setCooldown] = useState(false)
   const reactionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -123,11 +148,15 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
     paused = g.phase === 'paused'
   const round = Math.max(1, Math.ceil(g.turn / 2))
   useLayoutEffect(() => {
-    if (!keyboard && boardRef.current) boardRef.current.scrollTop = boardPosition.current
-  }, [keyboard])
+    if (boardRef.current)
+      boardRef.current.scrollTop = storage.read<number>(`board-scroll:${key}`, 0)
+  }, [key])
   useEffect(() => () => clearTimeout(reactionTimer.current), [])
   useEffect(() => {
-    if (!canWrite) setGuessMode(false)
+    if (!canWrite) {
+      setGuessMode(false)
+      setSheet((current) => (current === 'ideas' || current === 'guess' ? null : current))
+    }
   }, [canWrite])
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -138,7 +167,10 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
         width = window.innerWidth
       if (width !== viewportSize.current.width) viewportSize.current = { width, height }
       viewportSize.current.height = Math.max(viewportSize.current.height, height)
-      setKeyboard(height < viewportSize.current.height * 0.75)
+      setKeyboard(
+        document.activeElement === questionInput.current &&
+          height < viewportSize.current.height * 0.75,
+      )
       document.documentElement.style.setProperty('--play-height', `${height}px`)
     }
     resize()
@@ -152,9 +184,7 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
     }
   }, [])
   function changeDraft(value: string) {
-    const text = Array.from(value.replace(/[\r\n\t]/g, ' '))
-      .slice(0, 50)
-      .join('')
+    const text = trimQuestion(value)
     setDraft(text)
     if (!storage.write(`draft:${key}`, text)) setSaveFailed(true)
   }
@@ -182,21 +212,42 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
         : [...safeEliminated, id],
     )
   }
-  async function copy() {
-    try {
-      await copyText(invitation(s.code))
-      setCopied(true)
-      setCopyFailed(false)
-    } catch {
-      setCopyFailed(true)
-    }
+  const firstReview =
+    latest?.asker === s.you &&
+    !s.history.some((q) => q.asker === s.you && q.status === 'answered' && q.turn < latest.turn)
+  const connected = controller.connection === 'online' || controller.preview
+  let yourDeadline: string | null = null
+  let otherDeadline: string | null = null
+  if (g.phase === 'question') {
+    const writingDeadline = flow.submitted ? null : flow.writingDeadline
+    const baseReviewDeadline =
+      flow.startedAt && settings.review !== null
+        ? new Date(Date.parse(flow.startedAt) + settings.review * 1000).toISOString()
+        : null
+    const reviewDeadline = flow.reviewReady
+      ? null
+      : flow.submitted
+        ? flow.reviewDeadline
+        : baseReviewDeadline
+    yourDeadline = writer ? writingDeadline : reviewDeadline
+    otherDeadline = writer ? reviewDeadline : writingDeadline
+  } else if (g.phase === 'answer') {
+    if (canAnswer) yourDeadline = g.deadline
+    else otherDeadline = g.deadline
+  } else if (lobby && s.mode === 'match') {
+    if (!me.ready) yourDeadline = g.deadline
+    if (other && !other.ready) otherDeadline = g.deadline
   }
-  const reviewBase =
-    flow.startedAt && settings.review !== null
-      ? new Date(Date.parse(flow.startedAt) + settings.review * 1000).toISOString()
-      : null
-  const reviewClock = flow.reviewDeadline ?? reviewBase
-  const extraReview = !flow.submitted && reviewBase && now >= Date.parse(reviewBase)
+  const yourSeconds = secondsRemaining(yourDeadline, 0, now)
+  const otherSeconds = secondsRemaining(otherDeadline, 0, now)
+  const resumeReady = g.pause?.resumeReady.includes(s.you)
+  const canEndPause = g.pause && now - Date.parse(g.pause.since) >= 120000
+  const missingPlayer = g.pause?.missing === s.you ? 'You' : (other?.name ?? 'The other player')
+  const boardHint = inspect
+    ? 'Tap faces to inspect'
+    : guessMode
+      ? 'Tap a face to guess'
+      : 'Tap faces to cross them out'
   return (
     <div className={`play-app ${keyboard ? 'keyboard-open' : ''}`}>
       {controller.preview && (
@@ -209,48 +260,30 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
       )}
       <header className="play-header">
         <Logo onClick={onMenu} />
-        <div className="play-room-id">
-          <span>{s.mode === 'match' ? 'QUICK MATCH' : 'ROOM'}</span>
-          <b>{s.code}</b>
-          {!controller.preview && (
-            <button
-              className="icon-button"
-              aria-label="Copy invitation link"
-              onClick={() => void copy()}
-            >
-              {copied ? <Check size={16} /> : <Copy size={16} />}
-            </button>
+        <div className="play-matchup">
+          {other ? (
+            <>
+              <b>{me.name}</b>
+              <span>vs</span>
+              <b>{other.name}</b>
+            </>
+          ) : (
+            <>
+              <span>Room code:</span>
+              <b className="play-room-code">{s.code}</b>
+            </>
           )}
         </div>
+        {!connected && (
+          <span className="play-offline" role="status" title="Reconnecting">
+            <WifiOff size={18} aria-hidden="true" />
+            <span className="sr-only">Reconnecting</span>
+          </span>
+        )}
         <button className="game-menu-button" aria-label="Game menu" onClick={onMenu}>
-          <Menu size={23} />
-          <span>Menu</span>
+          <Menu size={22} />
         </button>
       </header>
-      <div className="play-status">
-        <div>
-          <span
-            className={`live-dot ${controller.connection === 'online' || controller.preview ? 'is-live' : ''}`}
-          />
-          <b>{me.name}</b>
-          <span>vs</span>
-          <b>{other?.name ?? 'Waiting for a friend'}</b>
-        </div>
-        <span className="play-connection">
-          {controller.connection === 'online' || controller.preview ? (
-            <Wifi size={13} />
-          ) : (
-            <WifiOff size={13} />
-          )}
-          <span>
-            {controller.preview
-              ? 'Preview'
-              : controller.connection === 'online'
-                ? 'Connected'
-                : 'Reconnecting'}
-          </span>
-        </span>
-      </div>
       {finished ? (
         <main className="play-result">
           <div className={`result-symbol ${g.winner === s.you ? 'won' : ''}`}>
@@ -326,113 +359,93 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
         </main>
       ) : (
         <>
-          <section className="play-phase" aria-live="polite">
+          <section className="play-phase">
             <div className="phase-title">
-              <div>
-                <p className="eyebrow">
-                  {lobby
-                    ? 'CHOOSE YOUR SECRET'
-                    : paused
-                      ? 'A MOMENT TO RECONNECT'
-                      : `ROUND ${round} · QUESTION ${g.turn % 2 === 1 ? '1' : '2'} OF 2`}
-                </p>
+              <div aria-live="polite">
                 <h1>
                   {lobby
                     ? waitingForBoard
                       ? 'Preparing your faces.'
                       : 'Pick your person.'
                     : paused
-                      ? 'Let’s pause here.'
+                      ? 'Game paused'
                       : g.phase === 'answer'
                         ? canAnswer
                           ? 'Your answer.'
-                          : 'Their answer.'
+                          : 'Their turn'
                         : writer
                           ? flow.submitted
-                            ? 'Question ready.'
-                            : 'Your next good question.'
+                            ? 'Question sent'
+                            : guessMode
+                              ? 'Pick your guess'
+                              : 'Ask a question'
                           : flow.reviewReady
-                            ? 'You’re ready.'
-                            : 'Make your eliminations.'}
+                            ? 'Review complete'
+                            : firstReview
+                              ? 'Who can you rule out?'
+                              : 'Rule out faces'}
                 </h1>
               </div>
-              {(g.phase === 'answer' || (lobby && s.mode === 'match')) && (
-                <Clock
-                  deadline={g.deadline}
-                  now={now}
-                  label={lobby ? 'Character selection time' : 'Answer time'}
-                />
-              )}
-            </div>
-            {g.phase === 'question' && (
-              <div className="activity-pair">
-                <div className={`activity-chip ${writer ? 'your-activity' : ''}`}>
-                  <span>
-                    {writer ? 'You' : other?.name} · {flow.submitted ? 'submitted' : 'writing'}
-                  </span>
-                  {flow.submitted ? (
-                    <CheckCheck size={18} />
-                  ) : (
-                    <Clock deadline={flow.writingDeadline} now={now} label="Writing time" />
-                  )}
-                </div>
-                <div className={`activity-chip ${!writer ? 'your-activity' : ''}`}>
-                  <span>
-                    {!writer ? 'You' : other?.name} · {flow.reviewReady ? 'ready' : 'reviewing'}
-                  </span>
-                  {flow.reviewReady ? (
-                    <CheckCheck size={18} />
-                  ) : extraReview ? (
-                    <small>Extra review</small>
-                  ) : (
-                    <Clock deadline={reviewClock} now={now} label="Review time" />
-                  )}
-                </div>
-              </div>
-            )}
-            {lobby && (
-              <p className="phase-guidance">
-                {s.mode === 'match'
-                  ? 'You’ve been paired. Pick a secret and get ready within two minutes.'
-                  : 'Your choice stays secret until the game ends.'}
-              </p>
-            )}
-          </section>
-          <div className="play-workspace">
-            <section className="play-board" aria-label="Character board">
-              <div className="play-board-tools">
-                <span>
-                  {lobby ? 'Tap a face to choose' : `${24 - safeEliminated.length} of 24 remaining`}
-                </span>
-                <div>
+              {!!board.length && (
+                <div className="play-board-tools">
                   <button
                     className={inspect ? 'selected-tool' : ''}
                     aria-pressed={inspect}
-                    onClick={() => setInspect((v) => !v)}
+                    onClick={() => {
+                      setGuessMode(false)
+                      setInspect((v) => !v)
+                    }}
                   >
-                    <Expand size={14} />
-                    {inspect ? 'Inspecting' : 'Inspect'}
+                    <Expand size={17} />
+                    Inspect
                   </button>
-                  {!lobby && (
-                    <button
-                      aria-label="Reset eliminations"
-                      disabled={!safeEliminated.length}
-                      onClick={() => changeEliminated([])}
-                    >
-                      <RotateCcw size={15} />
+                  {!lobby && safeEliminated.length > 0 && (
+                    <button aria-label="Reset eliminations" onClick={() => changeEliminated([])}>
+                      <RotateCcw size={18} />
                     </button>
                   )}
                 </div>
+              )}
+            </div>
+            {(!lobby || yourSeconds > 0 || (other && otherSeconds > 0)) && (
+              <div className="phase-meta">
+                {!lobby && (
+                  <div className="phase-progress">
+                    {!paused && <span>{`Round ${round} · ${g.turn % 2 === 1 ? '1' : '2'}/2`}</span>}
+                    <span>{board.length - safeEliminated.length} left</span>
+                    <span id="board-hint">{boardHint}</span>
+                  </div>
+                )}
+                {yourSeconds > 0 ? (
+                  <Clock seconds={yourSeconds} owner="Your time" />
+                ) : other && otherSeconds > 0 ? (
+                  <Clock seconds={otherSeconds} owner={other.name} />
+                ) : null}
               </div>
+            )}
+          </section>
+          <div className="play-workspace">
+            <section
+              className="play-board"
+              aria-label="Character board"
+              aria-describedby={lobby ? undefined : 'board-hint'}
+            >
               <div
                 className="play-board-scroll"
                 ref={boardRef}
-                onScroll={(e) => {
-                  if (!keyboard) {
-                    boardPosition.current = e.currentTarget.scrollTop
-                    storage.write(`board-scroll:${key}`, boardPosition.current)
+                onMouseDown={(event) => {
+                  if (
+                    !lobby &&
+                    !inspect &&
+                    !guessMode &&
+                    questionInput.current?.matches(':focus') &&
+                    event.target instanceof Element &&
+                    event.target.closest('button')
+                  ) {
+                    event.preventDefault()
                   }
                 }}
+                onScroll={(e) => storage.write(`board-scroll:${key}`, e.currentTarget.scrollTop)}
               >
                 <CharacterBoard
                   board={board}
@@ -444,7 +457,7 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                   mode={lobby ? 'select' : guessMode ? 'guess' : 'eliminate'}
                   selected={lobby ? s.myCharacter : null}
                   eliminated={safeEliminated}
-                  disabled={lobby && (controller.busy || me.ready || waitingForBoard)}
+                  disabled={!inspect && lobby && (controller.busy || me.ready || waitingForBoard)}
                   onPick={pick}
                 />
               </div>
@@ -475,95 +488,77 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                 </div>
               ) : paused ? (
                 <div className="paused-activity">
-                  <div className="pause-icon">
-                    <Clock3 size={26} />
-                  </div>
-                  <h2>
-                    {g.pause?.reason === 'disconnect'
-                      ? 'Waiting for a player to return.'
-                      : 'Time ran out. No rush.'}
-                  </h2>
-                  <p>
-                    {g.pause?.missing === s.you
-                      ? 'Let the other player know you’re back.'
-                      : `${s.players.find((p) => p.id === g.pause?.missing)?.name ?? 'The other player'} may need a moment.`}{' '}
-                    Your board and question are saved.
+                  <p role="status">
+                    {resumeReady
+                      ? `Waiting for ${other?.name ?? 'the other player'}`
+                      : g.pause?.reason === 'disconnect'
+                        ? `${missingPlayer} disconnected`
+                        : `${missingPlayer} ran out of time`}
                   </p>
-                  {pending && <blockquote className="paused-question">“{pending.text}”</blockquote>}
-                  <button
-                    className="button primary"
-                    disabled={controller.busy || g.pause?.resumeReady.includes(s.you)}
-                    onClick={() => void controller.act('resume')}
-                  >
-                    {g.pause?.resumeReady.includes(s.you)
-                      ? 'Waiting for the other player…'
-                      : 'I’m back · ready to continue'}
-                  </button>
-                  {g.pause && now - Date.parse(g.pause.since) >= 120000 ? (
-                    <>
-                      <p>You can keep waiting or end without a winner.</p>
-                      <button
-                        className="button secondary"
-                        onClick={() => void controller.act('end')}
-                      >
-                        End game without a winner
-                      </button>
-                    </>
-                  ) : (
-                    <p className="pause-grace">
-                      You can end without a winner after the two-minute return window.
-                    </p>
+                  {(!resumeReady || canEndPause) && (
+                    <div className="pause-actions">
+                      {!resumeReady && (
+                        <button
+                          className="button primary"
+                          disabled={controller.busy}
+                          onClick={() => void controller.act('resume')}
+                        >
+                          Wait
+                        </button>
+                      )}
+                      {canEndPause && (
+                        <button
+                          className="button secondary"
+                          disabled={controller.busy}
+                          onClick={() => void controller.act('end')}
+                        >
+                          End game
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               ) : lobby ? (
                 <>
-                  <div className="picked-secret">
-                    {mySecret ? (
-                      <>
+                  <div className="lobby-ready">
+                    {mySecret && (
+                      <div className="picked-secret">
                         <Portrait character={mySecret} />
                         <div>
                           <span>
-                            <LockKeyhole size={12} /> YOUR SECRET
+                            <LockKeyhole size={14} /> Your secret
                           </span>
                           <h2>{mySecret.name}</h2>
-                          <p>Only you can see your choice.</p>
                         </div>
-                      </>
-                    ) : (
-                      <>
-                        <span className="empty-secret">?</span>
-                        <div>
-                          <h2>Who’s your secret?</h2>
-                          <p>Tap a face above.</p>
-                        </div>
-                      </>
+                      </div>
                     )}
+                    <button
+                      className={`button ${me.ready ? 'secondary' : 'primary'}`}
+                      disabled={!mySecret || controller.busy}
+                      onClick={() => void controller.act(me.ready ? 'unready' : 'ready')}
+                    >
+                      {me.ready ? (
+                        'Change my pick'
+                      ) : (
+                        <>
+                          <Check size={18} /> I’m ready
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <button
-                    className="button primary"
-                    disabled={!mySecret || controller.busy}
-                    onClick={() => void controller.act(me.ready ? 'unready' : 'ready')}
-                  >
-                    <Check size={18} />
-                    {me.ready ? 'Change my person' : 'I’m ready'}
-                  </button>
-                  <p className="ready-status" role="status">
-                    {other
-                      ? `${other.name} is ${other.ready ? 'ready' : 'choosing a character'}.`
-                      : 'Invite a friend to choose their secret.'}
-                  </p>
+                  {other && (me.ready || other.ready) && (
+                    <p className="ready-status" role="status">
+                      {other.ready ? `${other.name} is ready` : `Waiting for ${other.name}`}
+                    </p>
+                  )}
                   {!other && !controller.preview && (
                     <div className="lobby-invite">
-                      <b>{s.code}</b>
-                      <button className="button secondary" onClick={() => void copy()}>
-                        <Copy size={16} />
-                        {copied ? 'Copied!' : 'Copy invitation'}
+                      <button className="button secondary" onClick={() => void onCopyInvite()}>
+                        {inviteStatus === 'copied' ? <Check size={18} /> : <Copy size={18} />}
+                        {inviteStatus === 'copied' ? 'Link copied' : 'Copy invitation link'}
                       </button>
-                      {copyFailed && <p>Copy unavailable. Share the room code above.</p>}
+                      {inviteStatus === 'failed' && <p role="status">Share the room code above.</p>}
                     </div>
-                  )}
-                  {s.boardSource === 'cache' && (
-                    <p className="cache-note">Playing with saved faces.</p>
                   )}
                 </>
               ) : g.phase === 'answer' ? (
@@ -585,15 +580,7 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                       </button>
                     )}
                     <div>
-                      <p className="eyebrow">
-                        {canAnswer ? 'ANSWER ABOUT YOUR SECRET' : 'YOUR QUESTION'}
-                      </p>
                       <h2 className="asked-question">“{pending?.text}”</h2>
-                      {!canAnswer && (
-                        <p className="phase-guidance">
-                          {other?.name} is thinking. Your board is still yours to edit.
-                        </p>
-                      )}
                     </div>
                   </div>
                   {canAnswer ? (
@@ -624,93 +611,89 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                   {flow.submitted ? (
                     <div className="submitted-question">
                       <CheckCheck size={24} />
-                      <h2>Ready when they are.</h2>
                       <p>“{flow.ownSubmission}”</p>
                       <small>
-                        {flow.reviewReady
-                          ? 'Starting the answer step…'
-                          : `${other?.name} is finishing their eliminations.`}
+                        {flow.reviewReady ? 'Starting shortly…' : `Waiting for ${other?.name}`}
                       </small>
                     </div>
                   ) : (
-                    <>
-                      <QuestionIdeas focused={focused} onUse={changeDraft} />
-                      <form
-                        className="play-composer"
-                        onSubmit={(e) => {
-                          e.preventDefault()
-                          if (draft.trim() && !controller.busy) void ask()
+                    <form
+                      className="play-composer"
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        if (draft.trim() && !controller.busy) void ask()
+                      }}
+                    >
+                      <label className="sr-only" htmlFor="question-input">
+                        Your question
+                      </label>
+                      <textarea
+                        ref={questionInput}
+                        id="question-input"
+                        aria-describedby="question-count"
+                        placeholder="Type a yes or no question"
+                        rows={2}
+                        value={draft}
+                        onChange={(e) => changeDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                            e.preventDefault()
+                            if (draft.trim() && !controller.busy) void ask()
+                          }
                         }}
-                      >
-                        <label htmlFor="question-input">
-                          Your question <span>{Array.from(draft).length}/50</span>
-                        </label>
-                        <div>
-                          <textarea
-                            id="question-input"
-                            aria-label="Your question"
-                            placeholder="Ask about their secret person…"
-                            rows={2}
-                            value={draft}
-                            onFocus={() => setFocused(true)}
-                            onBlur={() => setFocused(false)}
-                            onChange={(e) => changeDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-                                e.preventDefault()
-                                if (draft.trim() && !controller.busy) void ask()
-                              }
-                            }}
-                          />
-                          <button
-                            className="send-button"
-                            type="submit"
-                            aria-label="Ask question"
-                            disabled={!draft.trim() || controller.busy}
-                          >
-                            <Send size={19} />
-                          </button>
-                        </div>
-                      </form>
+                      />
+                      <div className="composer-tools">
+                        <button type="button" onClick={() => setSheet('ideas')}>
+                          <Lightbulb size={18} /> Ideas
+                        </button>
+                        <span className="question-count" id="question-count">
+                          {characterCount(draft)}/{MAX_QUESTION}
+                        </span>
+                        <button
+                          type="button"
+                          aria-pressed={guessMode}
+                          onClick={() => {
+                            setInspect(false)
+                            setGuessMode((v) => !v)
+                          }}
+                        >
+                          <Flag size={17} />
+                          {guessMode ? 'Cancel guess' : 'Final guess'}
+                        </button>
+                      </div>
                       <button
-                        className={`guess-link ${guessMode ? 'guess-on' : ''}`}
-                        onClick={() => {
-                          setInspect(false)
-                          setGuessMode((v) => !v)
-                        }}
+                        className="send-button"
+                        type="submit"
+                        aria-label="Ask question"
+                        disabled={!draft.trim() || controller.busy}
                       >
-                        <Flag size={16} />
-                        {guessMode ? 'Cancel final guess · choose on board' : 'I know who it is'}
-                        <ArrowRight size={15} />
+                        <Send size={19} />
                       </button>
-                    </>
+                    </form>
                   )}
                 </>
               ) : (
                 <>
-                  {latest ? (
+                  {latest && (
                     <div className="review-verdict">
+                      <p>“{latest.text}”</p>
                       <span className={`verdict-badge ${latest.answer ? 'yes' : 'no'}`}>
+                        {latest.answer ? (
+                          <Check size={18} aria-hidden="true" />
+                        ) : (
+                          <X size={18} aria-hidden="true" />
+                        )}
                         {latest.answer ? 'YES' : 'NO'}
                       </span>
-                      <div>
-                        <p>“{latest.text}”</p>
-                        <small>{other?.name}’s answer · review your board</small>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="review-verdict">
-                      <MessageCircle size={24} />
-                      <p>{other?.name} is writing the first question. Explore the cast.</p>
                     </div>
                   )}
-                  <p className="review-instructions">
-                    {flow.reviewReady
-                      ? `You’re ready. Waiting for ${other?.name}’s question.`
-                      : extraReview
-                        ? `Keep reviewing while ${other?.name} finishes writing.`
-                        : 'Tap characters to rule them out. Your eliminations stay private.'}
-                  </p>
+                  {(flow.reviewReady || !latest) && (
+                    <p className="review-status" role="status">
+                      {flow.reviewReady
+                        ? `Waiting for ${other?.name}`
+                        : `${other?.name} is writing a question`}
+                    </p>
+                  )}
                   {!flow.reviewReady && (
                     <button
                       className="button primary"
@@ -732,40 +715,27 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
         </>
       )}
       <nav className="play-nav" aria-label="Game tools">
-        <button onClick={onMenu}>
-          <Menu size={22} />
-          <span>Menu</span>
-        </button>
         <button onClick={() => setSheet('history')}>
-          <History size={19} />
-          <span>
-            History <small>{s.history.length}</small>
-          </span>
+          <History size={20} />
+          History
         </button>
         <button className="emoji-trigger" onClick={() => setSheet('emoji')}>
           <Smile size={21} />
-          <span>Emoji</span>
-        </button>
-        <button
-          aria-pressed={controller.mutedReactions}
-          onClick={() => controller.muteReactions(!controller.mutedReactions)}
-        >
-          {controller.mutedReactions ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          <span>{controller.mutedReactions ? 'Unmute' : 'Mute'} reactions</span>
+          Emoji
         </button>
       </nav>
       <div className="play-reactions" role="log" aria-live="polite" aria-label="Reactions">
-        {controller.reactions.map((r, i) => (
+        {controller.reactions.map((r) => (
           <span
-            className="reaction-float"
+            className="reaction-float reaction-glyph"
             key={r.id}
             role="img"
             aria-label={`${r.from === s.you ? 'You' : other?.name} reacted ${r.emoji}`}
             style={
               {
-                '--reaction-x': `${12 + ((i * 23 + (Number.parseInt(r.id.slice(0, 2), 16) % 25)) % 74)}%`,
-                '--reaction-drift': `${i % 2 ? 35 : -35}px`,
-                '--reaction-rotate': `${i % 2 ? 16 : -16}deg`,
+                '--reaction-x': `${r.position}%`,
+                '--reaction-drift': `${r.drift}px`,
+                '--reaction-rotate': `${r.rotation}deg`,
               } as CSSProperties
             }
           >
@@ -773,43 +743,26 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
           </span>
         ))}
       </div>
-      {sheet === 'rules' && (
-        <Sheet title="Read the person. Trust your gut." onClose={() => setSheet(null)}>
-          <ol className="play-rules">
-            <li>Choose your secret. The other player can’t see it.</li>
-            <li>Each round includes one question from each player.</li>
-            <li>
-              Writing and reviewing happen together. Submit your question to mark yourself ready;
-              press Done reviewing when your board is ready.
-            </li>
-            <li>
-              After submission, review ends at the later of the base review time or 20 seconds after
-              submission, within the writing limit. Unlimited review ends manually.
-            </li>
-            <li>Answer YES or NO about your own secret. You’ll see their portrait again.</li>
-            <li>
-              A missed writing or answer timer pauses the game. Both players must be ready to
-              resume.
-            </li>
-            <li>A correct final guess wins. A wrong guess loses.</li>
-          </ol>
-          <p className="lobby-timings">
-            {boardInfo(s.boardId).name} · Writing {timeLabel(settings.question)} · Answering{' '}
-            {timeLabel(settings.answer)} · Review {timeLabel(settings.review)}
-          </p>
-        </Sheet>
-      )}
+      <QuestionIdeas
+        open={sheet === 'ideas' && canWrite}
+        onClose={() => setSheet(null)}
+        onUse={(text) => {
+          changeDraft(text)
+          setSheet(null)
+          requestAnimationFrame(() => questionInput.current?.focus())
+        }}
+      />
       {sheet === 'history' && (
         <Sheet title="The conversation" onClose={() => setSheet(null)}>
           <div className="play-history">
             {s.history.length ? (
               [...s.history].reverse().map((q) => (
                 <article key={q.id}>
+                  <small>
+                    ROUND {Math.ceil(q.turn / 2)} · {q.asker === s.you ? 'You' : other?.name} asked
+                  </small>
                   <div>
-                    <small>
-                      ROUND {Math.ceil(q.turn / 2)} · {q.asker === s.you ? 'You' : other?.name}{' '}
-                      asked
-                    </small>
+                    <p>{q.text}</p>
                     <span
                       className={`verdict-badge ${q.status === 'answered' ? (q.answer ? 'yes' : 'no') : 'pending'}`}
                     >
@@ -824,7 +777,6 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                           : 'Unanswered'}
                     </span>
                   </div>
-                  <p>{q.text}</p>
                 </article>
               ))
             ) : (
@@ -834,12 +786,13 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
         </Sheet>
       )}
       {sheet === 'emoji' && (
-        <Sheet title="Send a little feeling." onClose={() => setSheet(null)}>
+        <Sheet title="Reactions" onClose={() => setSheet(null)}>
           <div className="emoji-picker">
-            {REACTIONS.map((emoji) => (
+            {REACTION_CHOICES.map(({ emoji, label }) => (
               <button
                 key={emoji}
-                aria-label={`React ${emoji}`}
+                aria-label={`Send reaction: ${label}`}
+                title={label}
                 disabled={cooldown || (!controller.preview && controller.connection !== 'online')}
                 onClick={() => {
                   setCooldown(true)
@@ -848,7 +801,9 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                   reactionTimer.current = setTimeout(() => setCooldown(false), 1000)
                 }}
               >
-                {emoji}
+                <span className="reaction-glyph" aria-hidden="true">
+                  {emoji}
+                </span>
               </button>
             ))}
           </div>
@@ -858,9 +813,7 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
             onClick={() => controller.muteReactions(!controller.mutedReactions)}
           >
             {controller.mutedReactions ? <VolumeX size={19} /> : <Volume2 size={19} />}{' '}
-            {controller.mutedReactions
-              ? 'Opponent reactions muted · tap to unmute'
-              : 'Mute opponent reactions'}
+            {controller.mutedReactions ? 'Unmute' : 'Mute'} reactions
           </button>
         </Sheet>
       )}
@@ -890,13 +843,11 @@ function Room({ controller, onMenu }: { controller: GameController; onMenu: () =
                 Confirm final guess <Flag size={18} />
               </button>
             </>
-          ) : (
+          ) : inspected.id === s.myCharacter ? (
             <p className="portrait-caption">
-              {inspected.id === s.myCharacter
-                ? 'Your secret · only you can see this choice.'
-                : 'Look closely. Everyone has their own story.'}
+              <LockKeyhole size={16} /> Your secret
             </p>
-          )}
+          ) : null}
         </Sheet>
       )}
     </div>

@@ -1,57 +1,70 @@
-﻿import { useEffect, useState } from 'react'
-import { Lightbulb, Shuffle } from 'lucide-react'
-import { QUESTION_CATEGORIES, type QuestionCategory } from '../game/questions'
+﻿import { useState } from 'react'
+import { ChevronLeft, Shuffle } from 'lucide-react'
+import { PLAYABLE_QUESTION_CATEGORIES as categories } from '../game/questions'
+import { Sheet } from './Sheet'
+
 export function QuestionIdeas({
+  open,
   onUse,
-  focused,
+  onClose,
 }: {
+  open: boolean
   onUse: (text: string) => void
-  focused: boolean
+  onClose: () => void
 }) {
-  const [category, setCategory] = useState<QuestionCategory>('Everyday')
-  const [index, setIndex] = useState(() => Math.floor(Math.random() * 25))
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (!focused && document.visibilityState === 'visible') setIndex((i) => (i + 1) % 25)
-    }, 5000)
-    return () => clearInterval(id)
-  }, [focused])
+  const [history, setHistory] = useState([{ category: 0, index: 0 }])
+  if (!open) return null
+
+  const { category, index } = history.at(-1)!
+  const questions = categories[category]?.questions ?? []
+  const question = questions[index]
+
+  function shuffle() {
+    const offset = 1 + Math.floor(Math.random() * (questions.length - 1))
+    setHistory((current) => [...current, { category, index: (index + offset) % questions.length }])
+  }
+
   return (
-    <div className="question-ideas">
-      <div>
-        <Lightbulb size={15} />
-        <label className="sr-only" htmlFor="idea-category">
-          Question category
-        </label>
-        <select
-          id="idea-category"
-          value={category}
-          onChange={(e) => {
-            setCategory(e.target.value as QuestionCategory)
-            setIndex((i) => (i + 7) % 25)
-          }}
-        >
-          {Object.keys(QUESTION_CATEGORIES).map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="icon-button"
-          aria-label="Shuffle question ideas"
-          onClick={() => setIndex((i) => (i + 1 + Math.floor(Math.random() * 24)) % 25)}
-        >
-          <Shuffle size={16} />
-        </button>
-      </div>
-      <button
-        type="button"
-        className="idea-text"
-        onClick={() => onUse(QUESTION_CATEGORIES[category][index]!)}
-      >
-        <span>{QUESTION_CATEGORIES[category][index]}</span>
-        <small>Use idea ↗</small>
-      </button>
-    </div>
+    <Sheet title="Question ideas" onClose={onClose}>
+      {question ? (
+        <div className="question-ideas">
+          <label className="sr-only" htmlFor="idea-category">
+            Question category
+          </label>
+          <select
+            id="idea-category"
+            value={category}
+            onChange={(e) => {
+              const next = { category: Number(e.target.value), index: 0 }
+              setHistory((current) => [...current, next])
+            }}
+          >
+            {categories.map(({ name }, i) => (
+              <option key={name} value={i}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <button type="button" className="idea-text" onClick={() => onUse(question)}>
+            <span>{question}</span>
+            <small>Use question</small>
+          </button>
+          <div className="idea-controls">
+            <button
+              type="button"
+              disabled={history.length < 2}
+              onClick={() => setHistory(history.slice(0, -1))}
+            >
+              <ChevronLeft size={18} /> Previous
+            </button>
+            <button type="button" disabled={questions.length < 2} onClick={shuffle}>
+              <Shuffle size={17} /> Shuffle
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p>No question ideas available.</p>
+      )}
+    </Sheet>
   )
 }

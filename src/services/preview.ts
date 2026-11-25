@@ -6,6 +6,7 @@ import {
   type BoardId,
 } from '../game/boards'
 import type { Character } from '../game/board-model'
+import { characterCount, MAX_QUESTION } from '../game/rules'
 import { DEFAULT_TIMINGS, reviewEnd, validTimings } from '../game/timings'
 import {
   GameError,
@@ -228,8 +229,8 @@ export function createPreviewService(): GameService {
         if (g.phase !== 'question' || g.activePlayer !== you || g.flow.submitted)
           fail('Submit one question on your writing turn.')
         const text = String(payload.text ?? '').trim()
-        if (!text || Array.from(text).length > 50 || /[\r\n\t]/.test(text))
-          fail('Use 1–50 characters on one line.')
+        if (!text || characterCount(text) > MAX_QUESTION || /[\r\n\t]/.test(text))
+          fail(`Use 1–${MAX_QUESTION} characters on one line.`)
         record.submission = text
         g.flow.submitted = true
         g.flow.reviewDeadline = iso(

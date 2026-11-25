@@ -159,6 +159,23 @@ describe('realtime and retention', () => {
     expect((await db.admin.query('select * from private.selections')).rows).toHaveLength(0)
     expect((await db.admin.query('select * from public.rooms')).rows).toHaveLength(0)
   })
+  it('refreshes room retention on a heartbeat close to the idle limit', async () => {
+    const room = await create()
+    await db.admin.query(
+      "update public.rooms set last_activity=clock_timestamp()-interval '23 hours 59 minutes' where id=$1",
+      [room.roomId],
+    )
+    expect(
+      (await db.rpc(a, 'heartbeat_room_v2', [room.roomId, room.version])).error,
+    ).toBeUndefined()
+    const updated = await db.admin.query(
+      "select last_activity > clock_timestamp()-interval '1 minute' as refreshed from public.rooms where id=$1",
+      [room.roomId],
+    )
+    expect(updated.rows[0]?.refreshed).toBe(true)
+    await db.admin.query('select public.cleanup_expired_rooms()')
+    expect((await snapshot(room)).roomId).toBe(room.roomId)
+  })
   it('does not revive an expired room by replaying its creation ID', async () => {
     const id = randomUUID(),
       room = await create(a, id)

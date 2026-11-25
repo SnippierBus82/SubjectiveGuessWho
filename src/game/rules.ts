@@ -1,6 +1,6 @@
 import type { RoomState } from './types'
 
-export const MAX_QUESTION = 50
+export const MAX_QUESTION = 75
 export const characterCount = (text: string) => Array.from(text).length
 export const trimQuestion = (text: string) =>
   Array.from(text.replace(/[\r\n\t]/g, ' '))

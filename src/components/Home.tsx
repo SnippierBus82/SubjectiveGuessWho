@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  Check,
   ChevronLeft,
   Gamepad2,
   HelpCircle,
@@ -16,7 +15,7 @@ import { config } from '../lib/config'
 import { navigatePage, navigateRoom, storage, type AppPage } from '../lib/platform'
 import { useProfile } from '../hooks/useProfile'
 import type { GameController } from '../hooks/useGame'
-import { DEFAULT_TIMINGS } from '../game/timings'
+import { DEFAULT_TIMINGS, paceName } from '../game/timings'
 import { boardInfo, previewBoard } from '../game/boards'
 import { LogoMark } from './LogoMark'
 import { Portrait } from './CharacterBoard'
@@ -39,9 +38,9 @@ export function Logo({ onClick }: { onClick?: () => void }) {
         <LogoMark />
       </span>
       <span>
-        subjective
+        Subjective
         <span className="brand-bottom">
-          guess who<span className="brand-dot">.</span>
+          Guess Who<span className="brand-dot">.</span>
         </span>
       </span>
     </button>
@@ -282,6 +281,7 @@ export function Home({
                   <details className="settings-disclosure">
                     <summary>
                       <Settings2 size={18} /> Room settings
+                      <strong className="soft-chip">{paceName(settings)}</strong>
                     </summary>
                     <RoomSettings value={settings} onChange={setSettings} />
                   </details>
@@ -394,22 +394,6 @@ export function Home({
                   <span className="soft-chip">Quick match</span>
                 </button>
               )}
-              <button className="selected-board" onClick={() => navigatePage('boards')}>
-                <span className="selected-board-faces" aria-hidden="true">
-                  {faces.slice(0, 3).map((face) => (
-                    <Portrait key={face.id} character={face} />
-                  ))}
-                </span>
-                <span>
-                  <small>Your board</small>
-                  <b>{boardInfo(boardId).name}</b>
-                </span>
-                <span className="board-change">Change</span>
-              </button>
-              <div className="play-footnote">
-                <Check size={16} /> Free to play <span>·</span>
-                <button onClick={() => setHelp(true)}>How to play</button>
-              </div>
               {!config.online && (
                 <p className="device-note">Local preview · play both seats on this device</p>
               )}
@@ -436,7 +420,7 @@ export function Home({
             <div>
               <span>🤫</span>
               <h3>Pick a secret face</h3>
-              <p>Keep it a secret from your friend.</p>
+              <p>Keep it a secret from your opponent.</p>
             </div>
             <div>
               <span>💬</span>
@@ -446,7 +430,7 @@ export function Home({
             <div>
               <span>🎯</span>
               <h3>Guess their person</h3>
-              <p>A right guess wins. A wrong guess loses!</p>
+              <p>Have one final guess to win!</p>
             </div>
           </div>
           <button className="button primary" onClick={() => setHelp(false)}>

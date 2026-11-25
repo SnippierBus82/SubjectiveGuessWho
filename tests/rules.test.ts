@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { characterCount, isNewerState, secondsRemaining, trimQuestion } from '../src/game/rules'
-import { QUESTION_LIBRARY } from '../src/game/questions'
-import { DEFAULT_TIMINGS, reviewEnd } from '../src/game/timings'
+import {
+  characterCount,
+  isNewerState,
+  MAX_QUESTION,
+  secondsRemaining,
+  trimQuestion,
+} from '../src/game/rules'
+import { PLAYABLE_QUESTION_CATEGORIES, QUESTION_LIBRARY } from '../src/game/questions'
+import { DEFAULT_TIMINGS, paceName, reviewEnd, ROOM_PACES, validTimings } from '../src/game/timings'
 import type { RoomState } from '../src/game/types'
 
 describe('client timing and reconciliation', () => {
@@ -12,8 +18,8 @@ describe('client timing and reconciliation', () => {
     expect(secondsRemaining('2026-11-15T12:00:00Z', 0, Date.parse('2026-11-15T12:00:30Z'))).toBe(0)
   })
   it('counts Unicode code points consistently with PostgreSQL', () => {
-    expect(characterCount('🤨'.repeat(50))).toBe(50)
-    expect(characterCount(trimQuestion('🤨'.repeat(80)))).toBe(50)
+    expect(characterCount('🤨'.repeat(75))).toBe(75)
+    expect(characterCount(trimQuestion('🤨'.repeat(76)))).toBe(75)
     expect(trimQuestion('hello\nworld')).toBe('hello world')
   })
   it('ignores out-of-order snapshots but accepts rematches and changed seats', () => {
@@ -25,11 +31,21 @@ describe('client timing and reconciliation', () => {
 })
 
 describe('question library and timer settings', () => {
-  it('ships 200 unique usable suggestions within the question limit', () => {
-    expect(QUESTION_LIBRARY).toHaveLength(200)
-    expect(new Set(QUESTION_LIBRARY).size).toBe(200)
-    for (const question of QUESTION_LIBRARY)
-      expect(Array.from(question).length).toBeLessThanOrEqual(50)
+  it('recognizes exact presets and labels other valid combinations Custom', () => {
+    expect(paceName(DEFAULT_TIMINGS)).toBe('Normal')
+    for (const [name, timings] of Object.entries(ROOM_PACES)) {
+      expect(validTimings(timings)).toBe(true)
+      expect(paceName({ ...timings })).toBe(name)
+    }
+    expect(paceName({ ...ROOM_PACES.Fast, answer: null })).toBe('Custom')
+  })
+
+  it('keeps authored questions unique and exposes only playable ideas', () => {
+    expect(new Set(QUESTION_LIBRARY).size).toBe(QUESTION_LIBRARY.length)
+    const playable = PLAYABLE_QUESTION_CATEGORIES.flatMap(({ questions }) => questions)
+    expect(playable).not.toHaveLength(0)
+    expect(playable).toEqual(QUESTION_LIBRARY.filter((q) => characterCount(q) <= MAX_QUESTION))
+    expect(PLAYABLE_QUESTION_CATEGORIES.every(({ questions }) => questions.length > 0)).toBe(true)
   })
 
   it('implements the agreed timing examples including unlimited caps', () => {

@@ -14,12 +14,15 @@ import { DEFAULT_BOARD, type BoardId } from '../game/boards'
 import { getService } from '../services'
 import { navigateRoom, newId, storage } from '../lib/platform'
 
+const REACTION_POSITIONS = [34, 56, 24, 68, 44, 76, 18, 62]
+type FloatingReaction = Reaction & { position: number; drift: number; rotation: number }
+
 export function useGame(roomId: string | null) {
   const [state, setState] = useState<RoomState | null>(null)
   const [service, setService] = useState<GameService>()
   const [connection, setConnection] = useState<Connection>('connecting')
   const [onlinePlayers, setOnlinePlayers] = useState<string[]>([])
-  const [reactions, setReactions] = useState<Reaction[]>([])
+  const [reactions, setReactions] = useState<FloatingReaction[]>([])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(Boolean(roomId))
@@ -30,6 +33,7 @@ export function useGame(roomId: string | null) {
   const mutedRef = useRef(mutedReactions)
   mutedRef.current = mutedReactions
   const reactionIds = useRef(new Set<string>())
+  const nextReactionSlot = useRef(0)
   const [search, setSearch] = useState<MatchStatus | null>(null)
   const searchName = useRef('')
   const searchBoard = useRef<BoardId>(storage.read<BoardId>('match-board', DEFAULT_BOARD))
@@ -52,7 +56,16 @@ export function useGame(roomId: string | null) {
     reactionIds.current.add(reaction.id)
     if (reactionIds.current.size > 200)
       reactionIds.current.delete(reactionIds.current.values().next().value!)
-    setReactions((current) => [...current.slice(-7), reaction])
+    const slot = nextReactionSlot.current
+    nextReactionSlot.current = (slot + 1) % REACTION_POSITIONS.length
+    const direction = slot % 2 ? 1 : -1
+    const floating = {
+      ...reaction,
+      position: REACTION_POSITIONS[slot]!,
+      drift: direction * 35,
+      rotation: direction * 16,
+    }
+    setReactions((current) => [...current.slice(1 - REACTION_POSITIONS.length), floating])
     const timer = setTimeout(() => {
       setReactions((current) => current.filter((r) => r.id !== reaction.id))
       reactionTimers.current = reactionTimers.current.filter((t) => t !== timer)
@@ -287,15 +300,7 @@ export function useGame(roomId: string | null) {
       setReactions([])
     }
     // Re-subscribe only when membership identity changes, never for a countdown tick.
-  }, [
-    state?.roomId,
-    state?.you,
-    service,
-    sync,
-    displayReaction,
-    apply,
-    dropUnavailableRoom,
-  ])
+  }, [state?.roomId, state?.you, service, sync, displayReaction, apply, dropUnavailableRoom])
 
   useEffect(() => {
     if (!state?.game.deadline) return

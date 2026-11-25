@@ -408,82 +408,11 @@ a {
 .quick-match .soft-chip {
   margin-left: auto;
 }
-.selected-board {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: white;
-  border: 1px solid #e8e0d5;
-  padding: 17px;
-  border-radius: 19px;
-  width: 100%;
-  text-align: left;
-  margin-top: 22px;
-}
-.selected-board-faces {
-  display: flex;
-  flex: none;
-  width: 83px;
-  padding-left: 3px;
-}
-.selected-board-faces img {
-  width: 34px;
-  height: 43px;
-  object-fit: cover;
-  border: 2px solid white;
-  border-radius: 8px;
-  margin-left: -3px;
-}
-.selected-board-faces img:nth-child(2) {
-  transform: rotate(-5deg);
-}
-.selected-board-faces img:nth-child(3) {
-  transform: rotate(6deg);
-}
-.selected-board > span:nth-child(2) {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-.selected-board small {
-  color: var(--app-muted);
-  font-size: 13px;
-}
-.selected-board b {
-  font-size: 16px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.board-change {
-  margin-left: auto;
-  color: #5b3cbb;
-  font-size: 14px;
-  font-weight: 700;
-}
-.play-footnote {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  color: #6b6475;
-  font-size: 13px;
-  margin-top: 17px;
-}
-.play-footnote > svg {
-  color: #377459;
-}
-.play-footnote button {
-  min-height: 44px;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .device-note {
   color: #6c607e;
   font-size: 12px;
   text-align: center;
-  margin-top: 5px;
+  margin-top: 16px;
   line-height: 1.5;
 }
 .back-button {
@@ -605,7 +534,7 @@ a {
 .game-shell .settings-disclosure {
   margin-top: 20px;
 }
-.game-shell .settings-disclosure summary {
+.game-shell .settings-disclosure > summary {
   min-height: 48px;
   font-size: 16px;
   font-weight: 700;
@@ -614,22 +543,30 @@ a {
   gap: 9px;
   cursor: pointer;
 }
-.game-shell .settings-disclosure summary::after {
-  content: '+';
+.settings-disclosure > summary .soft-chip {
   margin-left: auto;
+}
+.game-shell .settings-disclosure > summary::after {
+  content: '+';
   font-size: 24px;
 }
-.game-shell .settings-disclosure[open] summary::after {
+.game-shell .settings-disclosure[open] > summary::after {
   content: '−';
 }
 .game-shell .room-settings {
   border: 0;
-  padding: 14px 0;
+  padding: 0;
   margin: 0;
+}
+.pace-options {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  min-width: 0;
 }
 .game-shell .room-settings legend {
   font-size: 14px;
-  padding: 10px 0;
+  padding: 4px 0 10px;
   color: var(--app-muted);
 }
 .game-shell .room-settings label {
@@ -638,6 +575,49 @@ a {
 .game-shell .room-settings select {
   min-height: 48px;
   font-size: 15px;
+}
+.pace-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.pace-buttons button {
+  min-height: 44px;
+  border: 1px solid #ded3eb;
+  border-radius: 10px;
+  background: #fffdf8;
+  color: #513799;
+  font-size: 14px;
+  font-weight: 700;
+}
+.pace-buttons button[aria-pressed='true'] {
+  background: #eee5fa;
+  border-color: #7657cb;
+}
+.advanced-timers {
+  margin-top: 8px;
+}
+.advanced-timers summary,
+.game-details summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 700;
+  color: #5d4b6b;
+}
+.settings-disclosure > summary::-webkit-details-marker,
+.advanced-timers summary::-webkit-details-marker,
+.game-details summary::-webkit-details-marker {
+  display: none;
+}
+.advanced-timers[open] > summary svg,
+.game-details[open] > summary svg {
+  transform: rotate(180deg);
 }
 .game-shell .captcha {
   margin: 18px 0 0;
@@ -1015,17 +995,15 @@ a {
   margin: 0 -9px;
 }
 .game-menu-button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 48px;
-  padding: 9px 13px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
   background: #efe7ff;
   border: 1px solid #d9ccef;
   color: #513799;
   border-radius: 14px;
-  font-size: 16px;
-  font-weight: 700;
 }
 .play-app {
   background: #fcfaf7;
@@ -1038,36 +1016,8 @@ a {
   background: none;
   box-shadow: none;
 }
-.play-app .play-phase .eyebrow {
-  font-size: 12px;
-  letter-spacing: 1px;
-}
 .play-app .phase-title h1 {
   font-size: 32px;
-}
-.play-app .phase-guidance {
-  font-size: 14px;
-}
-.play-app .play-board-tools {
-  font-size: 14px;
-}
-.play-app .play-board-tools button {
-  min-height: 44px;
-  font-size: 14px;
-}
-.play-app .play-status {
-  font-size: 14px;
-}
-.play-app .play-connection {
-  font-size: 13px;
-}
-.play-app .picked-secret p,
-.play-app .ready-status,
-.play-app .cache-note {
-  font-size: 14px;
-}
-.play-app .picked-secret > div > span {
-  font-size: 12px;
 }
 .play-app .lobby-invite .button {
   font-size: 15px;
@@ -1080,53 +1030,10 @@ a {
   min-height: 36px;
   font-size: 13px;
 }
-.play-app .activity-chip {
-  font-size: 13px;
-  min-height: 36px;
-}
-.play-app .activity-chip > small {
-  font-size: 12px;
-}
-.play-app .play-nav > button {
-  font-size: 14px;
-  min-height: 56px;
-}
-.play-app .play-nav small {
-  font-size: 12px;
-}
-.play-app .guess-link {
-  font-size: 16px;
-  min-height: 46px;
-}
-.play-app .play-composer > label {
-  font-size: 15px;
-}
-.play-app .play-composer textarea {
-  font-size: 18px;
-}
-.play-app .review-instructions,
 .play-app .waiting-verdict,
-.play-app .submitted-question small,
-.play-app .review-verdict small {
+.play-app .submitted-question small {
   font-size: 14px;
   line-height: 1.5;
-}
-.play-app .paused-activity p,
-.play-app .paused-activity .pause-grace {
-  font-size: 14px;
-  line-height: 1.5;
-}
-.play-app .question-ideas select {
-  font-size: 14px;
-}
-.play-app .idea-text {
-  font-size: 15px;
-}
-.play-app .idea-text small {
-  display: none;
-}
-.play-app .answer-activity .eyebrow {
-  font-size: 12px;
 }
 .play-app .answer-secret > span {
   font-size: 13px;
@@ -1153,41 +1060,107 @@ a {
 }
 .game-menu-content {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 .game-menu-content .button {
   margin: 0;
   width: 100%;
 }
-.menu-room-label {
+.menu-room-card {
+  padding: 14px 14px 2px;
+  border: 1px solid #e8dfd5;
+  border-radius: 16px;
+  background: #fffdf8;
+}
+.menu-room-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  font-size: 13px;
-  color: #756784;
-  padding: 0 4px 8px;
+}
+.menu-room-label {
+  display: grid;
+  gap: 3px;
+  font-size: 14px;
+  color: #64566e;
 }
 .menu-room-label strong {
-  font-size: 24px;
-  letter-spacing: 2px;
+  font-size: 27px;
+  letter-spacing: 0.08em;
   color: #3b2e50;
 }
-.game-details {
-  border-top: 1px solid #e9e1ef;
-  padding-top: 7px;
-}
-.game-details summary {
-  font-size: 15px;
-  min-height: 48px;
-  align-content: center;
-  cursor: pointer;
-}
-.game-details p {
+.menu-copy,
+.game-menu-links button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding-inline: 10px;
+  border-radius: 9px;
+  color: #513799;
   font-size: 14px;
-  color: #71637f;
-  line-height: 1.7;
-  margin-bottom: 8px;
+  font-weight: 700;
+}
+.menu-copy {
+  background: #f0ebfa;
+}
+.menu-copy-status {
+  margin-top: 6px;
+  font-size: 14px;
+}
+.menu-board-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e8dfd5;
+}
+.menu-board-summary b {
+  overflow-wrap: anywhere;
+}
+.game-details dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.game-details dl > div {
+  display: grid;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 9px;
+  text-align: center;
+  background: #f5f0fa;
+}
+.game-details dt {
+  font-size: 13px;
+  color: #64566e;
+}
+.game-details dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.game-menu-links {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.game-menu-links .menu-leave {
+  color: #a13740;
+}
+.game-menu-links button:hover {
+  background: #efe7f6;
+}
+.game-menu-links .menu-leave:hover {
+  background: #fff0ed;
 }
 .danger-button {
   background: #fff0ed;
@@ -1448,35 +1421,6 @@ a {
     font-size: 11px;
     padding: 6px 8px;
   }
-  .selected-board {
-    gap: 11px;
-    padding: 14px 12px;
-    margin-top: 19px;
-  }
-  .selected-board-faces {
-    width: 73px;
-  }
-  .selected-board-faces img {
-    width: 30px;
-    height: 39px;
-  }
-  .selected-board b {
-    font-size: 14px;
-  }
-  .selected-board small {
-    font-size: 12px;
-  }
-  .board-change {
-    font-size: 13px;
-  }
-  .play-footnote {
-    margin-top: 11px;
-    font-size: 12px;
-  }
-  .device-note {
-    font-size: 12px;
-    margin-top: 0;
-  }
   .back-button {
     margin-top: -8px;
     margin-bottom: 12px;
@@ -1541,37 +1485,20 @@ a {
     padding: 30px 0;
   }
   .play-header {
-    padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+    padding: calc(4px + env(safe-area-inset-top)) 14px 4px;
     gap: 10px;
   }
   .play-header .brand {
-    font-size: 14px;
-    gap: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
   }
   .play-header .brand-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
   .play-header .brand > span:last-child {
     display: none;
-  }
-  .play-room-id {
-    margin: 0 auto 0 0;
-  }
-  .play-room-id > b {
-    font-size: 20px;
-    letter-spacing: 1px;
-  }
-  .game-menu-button {
-    min-height: 46px;
-    padding: 8px 12px;
-  }
-  .play-app .play-status {
-    padding: 8px 15px;
-    font-size: 13px;
-  }
-  .play-app .play-status b {
-    max-width: 120px;
   }
   .play-app .play-preview {
     padding: 0 14px;
@@ -1581,20 +1508,14 @@ a {
     font-size: 13px;
   }
   .play-app .play-phase {
-    padding: 5px 15px 10px;
+    padding: 8px 14px;
   }
-  .play-app .play-phase .eyebrow {
-    font-size: 11px;
-    margin-bottom: 5px;
+  .phase-title {
+    gap: 6px;
   }
   .play-app .phase-title h1 {
     font-size: 29px;
     line-height: 1.12;
-  }
-  .play-app .phase-guidance {
-    font-size: 13px;
-    line-height: 1.45;
-    margin-top: 7px;
   }
   .play-app .play-board {
     padding: 0 12px;
@@ -1608,106 +1529,37 @@ a {
     border-radius: 13px;
   }
   .play-app .character-name {
-    font-size: 16px;
-    padding: 7px 0 9px;
+    font-size: 17px;
+    padding: 6px 2px 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .play-app .portrait-frame {
     border-radius: 8px;
   }
-  .play-app .play-board-tools {
-    font-size: 13px;
-  }
-  .play-app .play-board-tools button {
-    font-size: 13px;
-    min-height: 44px;
+  .play-app .portrait-frame img {
+    aspect-ratio: 1;
   }
   .play-app .play-action {
-    padding: 14px 16px;
+    padding: 10px 14px;
     background: #fff;
   }
-  .play-app .picked-secret img {
-    width: 54px;
-  }
-  .play-app .picked-secret p {
-    font-size: 13px;
-  }
-  .play-app .picked-secret > div > span {
-    font-size: 11px;
-  }
   .play-app .play-action > .button {
-    margin-top: 12px;
-    min-height: 52px;
-  }
-  .play-app .ready-status {
-    font-size: 13px;
-    margin-top: 10px;
-  }
-  .play-app .cache-note {
-    font-size: 12px;
-  }
-  .play-app .play-action h2 {
-    font-size: 25px;
+    margin-top: 8px;
+    min-height: 48px;
   }
   .play-app .play-answer-buttons .button {
     min-height: 55px;
   }
   .play-app .play-nav {
-    padding: 5px 10px calc(5px + env(safe-area-inset-bottom));
-  }
-  .play-app .play-nav > button {
-    min-height: 56px;
-    font-size: 12px;
-    gap: 5px;
-  }
-  .play-app .play-nav > button > span {
-    white-space: normal;
-    line-height: 1.2;
-  }
-  .play-app .play-nav > button > svg {
-    width: 23px;
-    height: 23px;
-  }
-  .play-app .play-nav small {
-    display: none;
-  }
-  .play-app .activity-chip {
-    padding: 5px 8px;
-    font-size: 12px;
-    min-height: 36px;
+    padding: 3px 10px calc(3px + env(safe-area-inset-bottom));
   }
   .play-app .phase-clock {
     font-size: 14px;
   }
-  .play-app .play-composer textarea {
-    font-size: 17px;
-    min-height: 70px;
-  }
-  .play-app .guess-link {
-    min-height: 46px;
-    font-size: 15px;
-  }
-  .play-app .question-ideas {
-    margin-bottom: 12px;
-  }
-  .play-app .question-ideas > div {
-    max-width: 38%;
-  }
-  .play-app .question-ideas select {
-    font-size: 12px;
-  }
-  .play-app .idea-text {
-    font-size: 14px;
-    padding: 8px;
-    min-height: 64px;
-  }
-  .play-app .answer-activity .eyebrow {
-    font-size: 11px;
-  }
   .play-app .review-verdict p {
-    font-size: 21px;
-  }
-  .play-app .review-instructions {
-    font-size: 14px;
+    font-size: 23px;
   }
   .play-app .result-actions .button {
     font-size: 16px;
@@ -1719,10 +1571,11 @@ a {
     font-size: 40px;
   }
   .play-sheet {
-    width: calc(100vw - 20px);
-    padding: 22px;
-    border-radius: 25px;
-    margin-bottom: calc(10px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 100%;
+    padding: 16px 18px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 24px 24px 0 0;
+    margin: auto auto 0;
   }
   .play-sheet .sheet-heading h2 {
     font-size: 27px;
@@ -1738,12 +1591,6 @@ a {
   }
   .simple-rules p {
     font-size: 15px;
-  }
-  .keyboard-open .play-action {
-    max-height: none;
-  }
-  .keyboard-open .play-nav {
-    display: none;
   }
 }
 @media (max-width: 370px) {
@@ -1771,9 +1618,6 @@ a {
   .play-choice strong {
     font-size: 22px;
   }
-  .selected-board b {
-    font-size: 13px;
-  }
   .avatar-picker button {
     font-size: 23px;
     min-height: 45px;
@@ -1782,31 +1626,130 @@ a {
     font-size: 27px;
   }
 }
-@media (max-height: 500px) and (min-width: 701px) {
-  .play-header {
-    padding-top: 3px;
-    padding-bottom: 3px;
+@media (max-width: 440px) {
+  .pace-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .game-menu-button {
-    min-height: 44px;
+}
+@media (min-width: 560px) and (max-height: 500px) and (orientation: landscape) {
+  .play-header {
+    padding: calc(2px + env(safe-area-inset-top)) 14px 2px;
+  }
+  .play-header .brand-icon {
+    width: 32px;
+    height: 32px;
   }
   .play-app .phase-title h1 {
     font-size: 26px;
   }
   .play-app .play-phase {
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding: 2px 14px 6px;
   }
   .play-app .play-preview {
     min-height: 32px;
   }
+  .play-app .play-nav {
+    padding: 2px 10px calc(2px + env(safe-area-inset-bottom));
+  }
   .play-app .play-nav > button {
     min-height: 44px;
   }
-  .play-app .play-nav {
-    padding-top: 2px;
-    padding-bottom: 2px;
+  .play-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(232px, 33vw, 280px);
+    gap: 10px;
+    padding: 0 14px 6px;
   }
+  .play-app .play-board {
+    min-height: 0;
+    padding: 0;
+  }
+  .play-app .character-grid {
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    gap: 8px;
+  }
+  .play-app .portrait-frame img {
+    aspect-ratio: 1;
+  }
+  .play-app .play-action {
+    align-self: start;
+    max-height: 100%;
+    padding: 8px;
+    border: 1px solid var(--play-line);
+    border-radius: 12px;
+  }
+  .play-composer textarea {
+    height: clamp(56px, calc(var(--play-height, 100dvh) * 0.21), 78px);
+  }
+  .play-app .play-action:has(.play-answer-buttons) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .play-app .answer-activity {
+    display: flow-root;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .play-app .answer-secret {
+    float: left;
+    width: 56px;
+    margin: 0 8px 4px 0;
+    padding: 2px;
+  }
+  .play-app .answer-secret:focus-visible {
+    outline-offset: -2px;
+  }
+  .play-app .answer-secret > span {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    padding: 2px;
+  }
+  .play-app .answer-secret > span svg {
+    display: none;
+  }
+  .play-app .play-action h2.asked-question {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+  .play-app .play-answer-buttons {
+    flex: none;
+    gap: 8px;
+    margin: 0;
+  }
+  .play-app .play-answer-buttons .button {
+    min-height: 44px;
+    padding-inline: 6px;
+    font-size: 17px;
+  }
+  .composer-tools button {
+    padding-inline: 2px;
+    font-size: 14px;
+  }
+  .composer-tools button > svg {
+    display: none;
+  }
+  .question-count {
+    font-size: 13px;
+  }
+}
+.play-app.keyboard-open .play-header,
+.play-app.keyboard-open .play-preview,
+.play-app.keyboard-open .play-nav {
+  display: none;
+}
+.play-app.keyboard-open .play-phase {
+  padding-block: 2px 6px;
+}
+.play-app.keyboard-open .phase-title h1 {
+  font-size: 22px;
+}
+.play-app.keyboard-open .play-board {
+  min-height: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   .app-content {

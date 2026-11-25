@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { makeDatabase, users, prepareTestBoard, type RpcResponse } from './support/database'
 import { AI_BOARD } from '../src/game/board-model'
 import { DEFAULT_TIMINGS } from '../src/game/timings'
+import { REACTION_CHOICES } from '../src/game/types'
 import type { MatchStatus, RoomState, Timings } from '../src/game/types'
 let db: Awaited<ReturnType<typeof makeDatabase>>
 const a = users[0]!,
@@ -74,6 +75,23 @@ describe('gameplay', () => {
     expect(s.history).toHaveLength(2)
     expect(Date.parse(s.game.deadline!) - Date.parse(s.serverNow)).toBeGreaterThan(29000)
   })
+  it('stores a 75-code-point question and rejects 76', async () => {
+    const s = await playing()
+    const writer = s.game.activePlayer!
+    const answerer = writer === a ? b : a
+    const text = '🤨'.repeat(75)
+    expect((await action(s, writer, 'question', { text: text + '?' })).error).toMatch(/1–75/)
+    unwrap(await action(s, writer, 'question', { text }))
+    const next = await snap(s, answerer)
+    expect(next.game.phase).toBe('answer')
+    expect(next.history[0]?.text).toBe(text)
+    await expect(
+      db.admin.query('update public.questions set body=$1 where game_id=$2', [
+        text + '?',
+        s.game.id,
+      ]),
+    ).rejects.toMatchObject({ code: '23514' })
+  })
   it.each(['question', 'answer'])(
     'pauses an expired %s without skipping or inventing an answer',
     async (phase) => {
@@ -107,6 +125,80 @@ describe('gameplay', () => {
     expect(s.game.phase).toBe('answer')
     expect(s.game.deadline).toBeNull()
   })
+  it.each(['question', 'answer', 'review', 'all'] as const)(
+    'keeps the game running through a disconnect with Unlimited %s',
+    async (activity) => {
+      const settings =
+        activity === 'all'
+          ? { question: null, answer: null, review: null }
+          : { ...DEFAULT_TIMINGS, [activity]: null }
+      let s = await playing(settings)
+      const writer = s.game.activePlayer!
+      const reviewer = writer === a ? b : a
+      const goAbsent = async (player: string) =>
+        db.admin.query(
+          "update public.room_players set last_seen=clock_timestamp()-interval '50 seconds' where room_id=$1 and user_id=$2",
+          [s.roomId, player],
+        )
+      await goAbsent(reviewer)
+      expect((await snap(s, writer)).game.phase).toBe('question')
+      s = unwrap(await action(s, writer, 'question', { text: 'Would they camp?' }))
+      expect(s.game.phase).toBe('answer')
+      await goAbsent(writer)
+      expect((await snap(s, reviewer)).game.phase).toBe('answer')
+      s = unwrap(await action(s, reviewer, 'answer', { answer: true }))
+      expect(s.game.phase).toBe('question')
+      expect(s.game.turn).toBe(2)
+    },
+  )
+  it('still pauses for a finite timeout when a mixed room has an absent player', async () => {
+    let s = await playing({ ...DEFAULT_TIMINGS, question: null })
+    s = unwrap(await action(s, s.game.activePlayer!, 'question', { text: 'Would they camp?' }))
+    await db.admin.query(
+      "update public.room_players set last_seen=clock_timestamp()-interval '80 seconds' where room_id=$1",
+      [s.roomId],
+    )
+    await db.admin.query(
+      "update public.games set deadline=clock_timestamp()-interval '1 second' where id=$1",
+      [s.game.id],
+    )
+    const paused = await snap(s)
+    expect(paused.game.phase).toBe('paused')
+    expect(paused.game.pause?.reason).toBe('timeout')
+    expect((await snap(s)).game.phase).toBe('paused')
+  })
+  it.each([null, 30])(
+    'restores a legacy disconnect pause with answer time %s on the next heartbeat',
+    async (answer) => {
+      let s = await playing({ ...DEFAULT_TIMINGS, answer, review: null })
+      s = unwrap(await action(s, s.game.activePlayer!, 'question', { text: 'Would they camp?' }))
+      const beforePause = s
+      await db.admin.query(
+        "select private.pause_game($1, 'disconnect', $2, clock_timestamp() - interval '20 seconds')",
+        [s.roomId, a],
+      )
+      await db.admin.query('update public.room_players set resume_ready=true where room_id=$1', [
+        s.roomId,
+      ])
+      const recovered = unwrap(await db.rpc(a, 'heartbeat_room_v2', [s.roomId, s.version]))
+      expect(recovered.game.phase).toBe('answer')
+      expect(recovered.game.turn).toBe(beforePause.game.turn)
+      expect(recovered.game.pause).toBeNull()
+      expect(recovered.history).toEqual(beforePause.history)
+      if (answer === null) {
+        expect(recovered.game.deadline).toBeNull()
+      } else {
+        const remaining = Date.parse(recovered.game.deadline!) - Date.parse(recovered.serverNow)
+        expect(remaining).toBeGreaterThan(49000)
+        expect(remaining).toBeLessThanOrEqual(50000)
+      }
+      const ready = await db.admin.query(
+        'select user_id from public.room_players where room_id=$1 and resume_ready',
+        [s.roomId],
+      )
+      expect(ready.rows).toHaveLength(0)
+    },
+  )
   it('keeps remaining time after a disconnect instead of resetting the activity', async () => {
     let s = await playing()
     await db.admin.query(
@@ -242,6 +334,19 @@ describe('gameplay', () => {
     expect(
       (await db.rpc(c, 'send_reaction_v2', [s.roomId, randomUUID(), '😂'])).error,
     ).toBeDefined()
+    for (const { emoji } of REACTION_CHOICES.slice(1)) {
+      await db.admin.query(
+        "update private.reaction_clock set sent_at=clock_timestamp()-interval '2 seconds' where user_id=$1",
+        [a],
+      )
+      expect(
+        (await db.rpc(a, 'send_reaction_v2', [s.roomId, randomUUID(), emoji])).error,
+      ).toBeUndefined()
+    }
+    const sent = await db.admin.query(
+      "select payload->>'emoji' as emoji from realtime.messages where event='reaction' order by id",
+    )
+    expect(sent.rows.map(({ emoji }) => emoji)).toEqual(REACTION_CHOICES.map(({ emoji }) => emoji))
   })
 })
 describe('matchmaking', () => {

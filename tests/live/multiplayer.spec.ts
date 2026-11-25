@@ -17,7 +17,8 @@ test('two independent players review, answer with secret portraits, reconnect, r
     await alice.getByRole('button', { name: 'Create game', exact: true }).click()
     await alice.getByLabel('What should your friend call you?').fill('Alice')
     await alice.getByRole('button', { name: 'Create game' }).click()
-    const code = await alice.locator('.play-room-id>b').innerText()
+    await expect(alice.getByText('Room code:', { exact: true })).toBeVisible()
+    const code = await alice.locator('.play-room-code').innerText()
     await bob.goto(`/?join=${code}`)
     await bob.getByLabel('What should your friend call you?').fill('Bob')
     await bob.getByRole('button', { name: 'Join', exact: true }).click()
@@ -27,8 +28,8 @@ test('two independent players review, answer with secret portraits, reconnect, r
     await bob.locator('.character-card').nth(1).click()
     await alice.getByRole('button', { name: 'I’m ready', exact: true }).click()
     await bob.getByRole('button', { name: 'I’m ready', exact: true }).click()
-    await expect(alice.locator('.play-phase .eyebrow')).toContainText('ROUND 1')
-    const asker = (await alice.getByRole('button', { name: 'I know who it is' }).isVisible())
+    await expect(alice.getByText('Round 1 · 1/2')).toBeVisible()
+    const asker = (await alice.getByRole('button', { name: 'Final guess' }).isVisible())
         ? alice
         : bob,
       answerer = asker === alice ? bob : alice
@@ -59,9 +60,9 @@ test('two independent players review, answer with secret portraits, reconnect, r
     await asker.getByRole('button', { name: 'NO', exact: true }).click()
     await expect(answerer.locator('.verdict-badge')).toContainText('NO')
     await asker.getByRole('button', { name: 'Emoji', exact: true }).click()
-    await asker.getByRole('button', { name: 'React 😂', exact: true }).click()
+    await asker.getByRole('button', { name: 'Send reaction: Laugh', exact: true }).click()
     await expect(answerer.locator('.reaction-float')).toHaveCount(1)
-    await asker.getByRole('button', { name: 'I know who it is' }).click()
+    await asker.getByRole('button', { name: 'Final guess' }).click()
     await asker
       .getByRole('button', {
         name: `${asker === alice ? bobSecret : aliceSecret}, make a final guess`,
@@ -99,10 +100,12 @@ test('Find a player matches two waiting identities without exposing the queue', 
     await b.getByRole('button', { name: /Find a player/ }).click()
     await expect(a.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
     await expect(b.getByRole('heading', { name: 'Pick your person.' })).toBeVisible()
-    expect(await a.locator('.play-room-id>b').innerText()).toBe(
-      await b.locator('.play-room-id>b').innerText(),
-    )
     await a.getByRole('button', { name: 'Game menu', exact: true }).click()
+    await b.getByRole('button', { name: 'Game menu', exact: true }).click()
+    expect(await a.locator('.menu-room-label strong').innerText()).toBe(
+      await b.locator('.menu-room-label strong').innerText(),
+    )
+    await b.getByRole('button', { name: 'Keep playing', exact: true }).click()
     await a.getByRole('button', { name: 'Leave game', exact: true }).click()
     await a.getByRole('button', { name: 'Yes, leave game', exact: true }).click()
     await expect(b.getByRole('heading', { name: 'Game ended.' })).toBeVisible()

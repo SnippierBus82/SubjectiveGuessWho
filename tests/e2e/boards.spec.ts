@@ -110,6 +110,7 @@ for (const source of ['online', 'cache']) {
     await page.getByRole('button', { name: 'Switch seat' }).click()
     await page.locator('.character-card').nth(1).click()
     await page.getByRole('button', { name: 'I’m ready', exact: true }).click()
+    await expect(page.getByText('Round 1 · 1/2', { exact: true })).toBeVisible()
     if (!(await page.getByLabel('Your question', { exact: true }).isVisible()))
       await page.getByRole('button', { name: 'Switch seat' }).click()
     await page.getByLabel('Your question', { exact: true }).fill('Would they enjoy a road trip?')
@@ -122,7 +123,7 @@ for (const source of ['online', 'cache']) {
       await page.evaluate(() => JSON.parse(localStorage.getItem('sgw:preview2')!).state.board),
     ).toEqual(before.board)
     await page.getByRole('button', { name: 'YES', exact: true }).click()
-    await page.getByRole('button', { name: 'I know who it is' }).click()
+    await page.getByRole('button', { name: 'Final guess' }).click()
     const target = await page.evaluate(() => {
       const r = JSON.parse(localStorage.getItem('sgw:preview2')!)
       const other = r.state.game.activePlayer === 'preview-one' ? 'preview-two' : 'preview-one'
