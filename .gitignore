@@ -1,12 +1,12 @@
 node_modules/
 .generated/
 public/social-preview.png
+public/fallback-faces/
 dist/
 .env
 .env.*
 !.env.example
 coverage/
-playwright-report/
 test-results/
 *.tsbuildinfo
 .vercel/

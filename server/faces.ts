@@ -1,12 +1,7 @@
 import sharp from 'sharp'
 import { createHash } from 'node:crypto'
 import names from '../src/game/neutral-names.json' with { type: 'json' }
-import {
-  AI_BOARD,
-  sample,
-  type BoardCatalog,
-  type ImageCharacter,
-} from '../src/game/board-model.ts'
+import { AI_BOARD, sample, type BoardCatalog, type Character } from '../src/game/board-model.js'
 
 export class SourceUnavailable extends Error {}
 export interface OnlineFace {
@@ -16,11 +11,13 @@ export interface OnlineFace {
 }
 export interface ResolvedBoard {
   source: 'folder' | 'online' | 'cache'
-  characters: ImageCharacter[]
+  characters: Character[]
   uploads: OnlineFace[]
 }
 const viewer = 'https://datasets-server.huggingface.co/rows'
 const dataset = 'RichardErkhov/OneMillionFaces'
+const pngSignature = Buffer.from('89504e470d0a1a0a', 'hex')
+const jpegSignature = Buffer.from('ffd8ff', 'hex')
 export async function boundedBytes(response: Response, maximum = 8 * 1024 * 1024): Promise<Buffer> {
   if (Number(response.headers.get('content-length')) > maximum)
     throw new Error('Response is too large.')
@@ -101,9 +98,18 @@ export async function onlineFaces(
           )
             throw new Error('Unexpected source image host.')
           const response = await fetcher(url, { signal })
-          if (!response.ok || !response.headers.get('content-type')?.startsWith('image/'))
+          const type = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase()
+          const binary = type === 'binary/octet-stream' || type === 'application/octet-stream'
+          if (!response.ok || (!type?.startsWith('image/') && !binary))
             throw new Error('Image unavailable.')
           const raw = await boundedBytes(response)
+          // The dataset viewer can label JPEG and PNG responses as generic binary.
+          if (
+            binary &&
+            !raw.subarray(0, jpegSignature.length).equals(jpegSignature) &&
+            !raw.subarray(0, pngSignature.length).equals(pngSignature)
+          )
+            throw new Error('Unexpected binary image format.')
           const bytes = await sharp(raw, { limitInputPixels: 16_000_000, animated: false })
             .rotate()
             .resize(512, 512, { fit: 'inside', withoutEnlargement: true })

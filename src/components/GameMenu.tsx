@@ -3,7 +3,7 @@ import { ChevronLeft, HelpCircle, LogOut, Play } from 'lucide-react'
 import { Sheet } from './Sheet'
 import type { GameController } from '../hooks/useGame'
 import { boardInfo } from '../game/boards'
-import { timeLabel, DEFAULT_TIMINGS } from '../game/timings'
+import { timeLabel } from '../game/timings'
 
 export function GameMenu({
   controller,
@@ -14,7 +14,7 @@ export function GameMenu({
 }) {
   const [view, setView] = useState<'menu' | 'leave' | 'rules'>('menu')
   const state = controller.state!
-  const settings = state.settings ?? DEFAULT_TIMINGS
+  const settings = state.settings
   return (
     <Sheet
       title={view === 'leave' ? 'Leave this game?' : view === 'rules' ? 'How to play' : 'Game menu'}

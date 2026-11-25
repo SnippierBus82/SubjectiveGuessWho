@@ -1,5 +1,5 @@
 export const AI_BOARD = 'ai-random'
-export interface ImageCharacter {
+export interface Character {
   id: string
   name: string
   image: string
@@ -9,7 +9,7 @@ export interface FolderBoard {
   name: string
   kind: 'folder'
   version: string
-  characters: ImageCharacter[]
+  characters: Character[]
 }
 export interface BoardCatalog {
   boards: FolderBoard[]

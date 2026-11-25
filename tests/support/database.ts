@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
 import { readFile, readdir } from 'node:fs/promises'
 import pg from 'pg'
@@ -10,6 +11,8 @@ export const users = Array.from(
 export interface RpcResponse {
   state?: RoomState
   error?: string
+  code?: string
+  version?: number
 }
 export interface Queryable {
   query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
@@ -97,16 +100,10 @@ export async function makeDatabase() {
     }
   }
   const allowed = [
-    'create_room',
-    'join_room',
-    'get_room',
-    'game_action',
-    'create_room_v2',
     'create_room_board_v2',
     'join_room_v2',
     'get_room_v2',
     'game_action_v2',
-    'matchmake_v2',
     'matchmake_board_v2',
     'send_reaction_v2',
     'heartbeat_room_v2',
@@ -139,8 +136,37 @@ export async function makeDatabase() {
       if (embedded) await embedded.close()
       else await pool!.end()
     },
-    transport: pool
-      ? 'PostgreSQL connection pool (true parallel transactions)'
-      : 'PGlite PostgreSQL (serialized connections)',
   }
+}
+
+export async function prepareTestBoard(
+  db: Awaited<ReturnType<typeof makeDatabase>>,
+  player: string,
+  room: RoomState,
+): Promise<RoomState> {
+  const lease = randomUUID()
+  const { roomId, game } = room
+  const board = Array.from({ length: 24 }, (_, index) => {
+    const id = `p${String(index + 1).padStart(2, '0')}`
+    return { id, name: `Person ${index + 1}`, image: `/fallback-faces/${id}.webp` }
+  })
+  const claim = await db.admin.query('select public.claim_board_v3($1,$2,$3,$4) as result', [
+    player,
+    roomId,
+    game.id,
+    lease,
+  ])
+  if ((claim.rows[0]?.result as { status: string }).status !== 'claimed')
+    throw new Error('Could not claim the test board.')
+  const saved = await db.admin.query('select public.finish_board_v3($1,$2,$3,$4,$5) as saved', [
+    roomId,
+    game.id,
+    lease,
+    'cache',
+    JSON.stringify(board),
+  ])
+  if (!saved.rows[0]?.saved) throw new Error('Could not save the test board.')
+  const { state, error } = await db.rpc(player, 'get_room_v2', [roomId])
+  if (!state) throw new Error(error ?? 'Could not load the prepared test board.')
+  return state
 }

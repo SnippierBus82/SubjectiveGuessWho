@@ -5,11 +5,11 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/boards/one-million-faces-v1/:file",
-      "destination": "/ai-face-cache/:file"
+      "source": "/ai-face-cache/:file",
+      "destination": "/fallback-faces/:file"
     },
     {
-      "source": "/((?!api/|ai-face-cache/|social-preview.png|SGW.svg|assets/|characters/|boards/|fonts/|favicon.svg|manifest.webmanifest|icon-192.png|icon-512.png|apple-touch-icon.png|THIRD_PARTY_NOTICES.txt).*)",
+      "source": "/((?!api/|ai-face-cache/|fallback-faces/|social-preview.png|SGW.svg|assets/|boards/|fonts/|favicon.svg|manifest.webmanifest|icon-192.png|icon-512.png|apple-touch-icon.png|THIRD_PARTY_NOTICES.txt).*)",
       "destination": "/index.html"
     }
   ],

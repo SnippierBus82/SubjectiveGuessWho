@@ -18,7 +18,7 @@ import { makeDatabase, users, type RpcResponse } from './support/database'
 
 const cache = Array.from({ length: 30 }, (_, i) => ({
   id: `cache-${i}`,
-  image: `/ai-face-cache/${i}.webp`,
+  image: `/fallback-faces/${i}.webp`,
 }))
 const folder = {
   id: 'folder/Friends',
@@ -37,13 +37,13 @@ describe('folder discovery and face sources', () => {
   beforeAll(async () => {
     root = await mkdtemp(join(tmpdir(), 'sgw-boards-'))
     await mkdir(join(root, 'public/boards/Friends'), { recursive: true })
-    await mkdir(join(root, 'public/ai-face-cache'), { recursive: true })
+    await mkdir(join(root, 'public/fallback-faces'), { recursive: true })
     for (let i = 0; i < 24; i++) {
       await writeFile(
         join(root, `public/boards/Friends/Person ${i}.svg`),
         `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="rgb(${i},80,120)"/></svg>`,
       )
-      await writeFile(join(root, `public/ai-face-cache/seed${i}.webp`), 'fixture')
+      await writeFile(join(root, `public/fallback-faces/seed${i}.webp`), 'fixture')
     }
   })
   afterAll(async () => {
@@ -123,21 +123,26 @@ describe('folder discovery and face sources', () => {
       }),
     ).rejects.toThrow(/Configuration/)
   })
-  it('downloads, validates, and optimizes a full online sample', async () => {
+  it('decodes provider JPEGs with generic binary headers and optimizes them', async () => {
     const images = await Promise.all(
-      Array.from({ length: 30 }, (_, i) =>
+      Array.from({ length: 24 }, (_, i) =>
         sharp({
           create: { width: 32, height: 32, channels: 3, background: { r: i * 7, g: 90, b: 130 } },
         })
-          .png()
+          .jpeg()
           .toBuffer(),
+      ),
+    )
+    images.push(
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" fill="red"/></svg>',
       ),
     )
     const fetcher: typeof fetch = async (input) => {
       const url = new URL(String(input))
       if (url.pathname === '/rows')
         return Response.json({
-          num_rows_total: 30,
+          num_rows_total: images.length,
           rows: images.map((_, i) => ({
             row: {
               png: { src: `https://datasets-server.huggingface.co/image/${i}` },
@@ -145,13 +150,15 @@ describe('folder discovery and face sources', () => {
             },
           })),
         })
-      return new Response(images[Number(url.pathname.split('/').at(-1))]!, {
-        headers: { 'content-type': 'image/png' },
+      const index = Number(url.pathname.split('/').at(-1))
+      return new Response(images[index]!, {
+        headers: { 'content-type': index % 2 ? 'application/octet-stream' : 'binary/octet-stream' },
       })
     }
     const result = await onlineFaces(fetcher)
     expect(result).toHaveLength(24)
     expect(new Set(result.map((face) => face.id)).size).toBe(24)
+    expect(result.every((face) => !face.source.endsWith('#seed24'))).toBe(true)
     expect((await sharp(result[0]!.bytes).metadata()).format).toBe('webp')
   })
   it('treats provider failures and the acquisition deadline as an outage', async () => {
@@ -226,6 +233,50 @@ describe('folder discovery and face sources', () => {
     expect(resolver).toHaveBeenCalledTimes(1)
     expect(rpc.mock.calls.some(([name]) => name === 'fail_board_v3')).toBe(true)
   })
+  it.each(['/fallback-faces/', '/ai-face-cache/'])(
+    'finalizes the outage fallback when the database accepts %s',
+    async (acceptedPrefix) => {
+      const writes: string[][] = []
+      const leases: unknown[] = []
+      const rpc = vi.fn(async (name: string, args: Record<string, unknown>) => {
+        if (name === 'claim_board_v3')
+          return { data: { status: 'claimed', boardId: AI_BOARD }, error: null }
+        if (name !== 'finish_board_v3') throw new Error(`Unexpected RPC: ${name}`)
+        expect(args.p_source).toBe('cache')
+        leases.push(args.p_lease)
+        const images = (args.p_characters as { image: string }[]).map((face) => face.image)
+        writes.push(images)
+        return images.every((image) => image.startsWith(acceptedPrefix))
+          ? { data: true, error: null }
+          : { data: null, error: { code: 'P0001', message: 'Invalid character' } }
+      })
+      const client = { rpc } as unknown as SupabaseClient
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      try {
+        const prepare = prepareBoard(
+          client,
+          catalog,
+          'actor',
+          randomUUID(),
+          randomUUID(),
+          (data, id) =>
+            resolveBoard(data, id, () =>
+              onlineFaces(async () => new Response(null, { status: 503 })),
+            ),
+        )
+        await expect(prepare).resolves.toBe('ready')
+        expect(writes[0]).toHaveLength(24)
+        expect(writes[0]!.every((image) => image.startsWith('/fallback-faces/'))).toBe(true)
+        expect(writes).toHaveLength(acceptedPrefix === '/ai-face-cache/' ? 2 : 1)
+        expect(writes.at(-1)).toEqual(
+          writes[0]!.map((image) => image.replace('/fallback-faces/', acceptedPrefix)),
+        )
+        expect(new Set(leases).size).toBe(1)
+      } finally {
+        warn.mockRestore()
+      }
+    },
+  )
   it('protects the HTTP endpoint and never enables unauthenticated preview in production', async () => {
     const server = createServer(
       (request, response) => void boardHttp(request, response, catalog, {}),

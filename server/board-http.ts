@@ -7,8 +7,8 @@ import {
   cleanupFaces,
   prepareBoard,
   registerBoard,
-} from './board-service.ts'
-import { resolveBoard } from './faces.ts'
+} from './board-service.js'
+import { resolveBoard } from './faces.js'
 
 export async function boardHttp(
   request: IncomingMessage & { body?: unknown },

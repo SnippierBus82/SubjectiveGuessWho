@@ -5,7 +5,7 @@ import {
   boardInfo,
   type BoardId,
 } from '../game/boards'
-import type { Character } from '../game/characters'
+import type { Character } from '../game/board-model'
 import { DEFAULT_TIMINGS, reviewEnd, validTimings } from '../game/timings'
 import {
   GameError,
@@ -16,8 +16,7 @@ import {
   type SubscriptionCallbacks,
 } from '../game/types'
 import { newId, storage } from '../lib/platform'
-import { createPreviewService as legacyPreview } from './legacy-preview'
-interface RecordV2 {
+interface PreviewRecord {
   state: RoomState
   secrets: Record<string, string>
   submission: string | null
@@ -28,8 +27,7 @@ const seats = ['preview-one', 'preview-two'] as const
 const iso = (n: number | null) => (n === null ? null : new Date(n).toISOString())
 const due = (n: number | null) => (n === null ? null : iso(Date.now() + n * 1000))
 export function createPreviewService(): GameService {
-  const legacy = legacyPreview()
-  let record = storage.read<RecordV2 | null>('preview2', null)
+  let record = storage.read<PreviewRecord | null>('preview2', null)
   let callbacks: SubscriptionCallbacks | undefined
   let lastReaction = 0
   const save = () => storage.write('preview2', record)
@@ -39,7 +37,7 @@ export function createPreviewService(): GameService {
     s.you = seats[record.seat]!
     s.myCharacter = record.secrets[s.you] ?? null
     s.reveals = s.game.phase === 'finished' ? { ...record.secrets } : null
-    s.game.flow!.ownSubmission = s.game.activePlayer === s.you ? record.submission : null
+    s.game.flow.ownSubmission = s.game.activePlayer === s.you ? record.submission : null
     s.serverNow = new Date().toISOString()
     return s
   }
@@ -72,7 +70,6 @@ export function createPreviewService(): GameService {
       state: {
         roomId: 'preview',
         code: 'PREVIEW',
-        rulesVersion: 2,
         settings: { ...settings },
         mode: 'private',
         boardId,
@@ -92,7 +89,6 @@ export function createPreviewService(): GameService {
         })),
         game: {
           id,
-          packId: boardId,
           phase: 'lobby',
           turn: 0,
           activePlayer: null,
@@ -128,11 +124,11 @@ export function createPreviewService(): GameService {
       phase: 'question',
       activePlayer: user,
       turn: first ? 1 : g.turn + 1,
-      deadline: due(s.settings!.question),
+      deadline: due(s.settings.question),
       pause: null,
       flow: {
         startedAt: iso(Date.now()),
-        writingDeadline: due(s.settings!.question),
+        writingDeadline: due(s.settings.question),
         reviewDeadline: null,
         submitted: false,
         reviewReady: first,
@@ -153,7 +149,7 @@ export function createPreviewService(): GameService {
       askedAt: iso(Date.now())!,
     })
     g.phase = 'answer'
-    g.deadline = due(s.settings!.answer)
+    g.deadline = due(s.settings.answer)
   }
   function advance() {
     if (!record) return
@@ -165,8 +161,8 @@ export function createPreviewService(): GameService {
       !['question', 'answer'].includes(g.phase)
     )
       return
-    if (g.phase === 'question' && g.flow!.submitted) {
-      g.flow!.reviewReady = true
+    if (g.phase === 'question' && g.flow.submitted) {
+      g.flow.reviewReady = true
       release()
     } else {
       const missing =
@@ -201,26 +197,11 @@ export function createPreviewService(): GameService {
     },
     snapshot: async (room) => {
       if (room !== 'preview') throw new GameError('Start a preview from Home.')
-      if (!record) return legacy.snapshot(room)
       advance()
       return view()
     },
     action: async (state, kind, payload, id) => {
-      if (!record) {
-        const next = await legacy.action(state, kind, payload, id)
-        if (kind === 'rematch' && next.game.phase === 'lobby') {
-          await fresh(
-            next.players[0]!.name,
-            DEFAULT_TIMINGS,
-            next.players.map((p) => p.name),
-          )
-          record!.seat = next.you === 'preview-one' ? 0 : 1
-          record!.state.version = next.version + 1
-          save()
-          return view()
-        }
-        return next
-      }
+      if (!record) throw new GameError('Start a fresh local preview from Home.')
       advance()
       const s = record.state,
         g = s.game,
@@ -235,7 +216,7 @@ export function createPreviewService(): GameService {
         fail('The turn has changed. Your draft is still here.')
       if (kind === 'select') {
         if (g.phase !== 'lobby' || me.ready) fail('Unready before changing your secret.')
-        if (!s.board!.some((c) => c.id === payload.characterId))
+        if (!s.board.some((c) => c.id === payload.characterId))
           fail('Choose a character from this board.')
         record.secrets[you] = String(payload.characterId)
       } else if (kind === 'ready' || kind === 'unready') {
@@ -244,24 +225,24 @@ export function createPreviewService(): GameService {
         if (s.players.every((p) => p.ready))
           begin(seats[crypto.getRandomValues(new Uint8Array(1))[0]! % 2]!, true)
       } else if (kind === 'question') {
-        if (g.phase !== 'question' || g.activePlayer !== you || g.flow!.submitted)
+        if (g.phase !== 'question' || g.activePlayer !== you || g.flow.submitted)
           fail('Submit one question on your writing turn.')
         const text = String(payload.text ?? '').trim()
         if (!text || Array.from(text).length > 50 || /[\r\n\t]/.test(text))
           fail('Use 1–50 characters on one line.')
         record.submission = text
-        g.flow!.submitted = true
-        g.flow!.reviewDeadline = iso(
-          reviewEnd(Date.parse(g.flow!.startedAt!), Date.now(), s.settings!),
+        g.flow.submitted = true
+        g.flow.reviewDeadline = iso(
+          reviewEnd(Date.parse(g.flow.startedAt!), Date.now(), s.settings),
         )
-        g.deadline = g.flow!.reviewDeadline
-        if (g.flow!.reviewReady) release()
+        g.deadline = g.flow.reviewDeadline
+        if (g.flow.reviewReady) release()
       } else if (kind === 'review') {
         if (g.phase !== 'question' || g.activePlayer === you)
           fail('Only the reviewing player can finish review.')
-        g.flow!.reviewReady = true
-        g.flow!.reviewDeadline = null
-        if (g.flow!.submitted) release()
+        g.flow.reviewReady = true
+        g.flow.reviewDeadline = null
+        if (g.flow.submitted) release()
       } else if (kind === 'answer') {
         if (g.phase !== 'answer' || g.activePlayer === you || typeof payload.answer !== 'boolean')
           fail('Switch seats to answer the question.')
@@ -270,9 +251,9 @@ export function createPreviewService(): GameService {
         q.status = 'answered'
         begin(you)
       } else if (kind === 'guess') {
-        if (g.phase !== 'question' || g.activePlayer !== you || g.flow!.submitted)
+        if (g.phase !== 'question' || g.activePlayer !== you || g.flow.submitted)
           fail('Guess before submitting your question.')
-        if (!s.board!.some((c) => c.id === payload.characterId))
+        if (!s.board.some((c) => c.id === payload.characterId))
           fail('Choose a character from this board.')
         const correct = record.secrets[other] === payload.characterId
         Object.assign(g, {
@@ -294,10 +275,10 @@ export function createPreviewService(): GameService {
           })
           g.phase = saved.phase
           g.pause = null
-          g.deadline = due(g.phase === 'answer' ? s.settings!.answer : s.settings!.question)
+          g.deadline = due(g.phase === 'answer' ? s.settings.answer : s.settings.question)
           if (g.phase === 'question') {
-            g.flow!.startedAt = iso(Date.now())
-            g.flow!.writingDeadline = g.deadline
+            g.flow.startedAt = iso(Date.now())
+            g.flow.writingDeadline = g.deadline
           }
         }
       } else if (kind === 'leave' || kind === 'end') {
@@ -322,7 +303,7 @@ export function createPreviewService(): GameService {
             version = s.version
           await fresh(
             s.players[0]!.name,
-            s.settings!,
+            s.settings,
             s.players.map((p) => p.name),
             isBoardId(s.boardId) ? s.boardId : DEFAULT_BOARD,
           )
@@ -335,8 +316,7 @@ export function createPreviewService(): GameService {
       save()
       return view()
     },
-    subscribe: async (room, you, cb) => {
-      if (!record) return legacy.subscribe(room, you, cb)
+    subscribe: async (_room, _you, cb) => {
       callbacks = cb
       cb.connection('preview')
       cb.presence([...seats])
@@ -350,7 +330,7 @@ export function createPreviewService(): GameService {
       callbacks?.reaction({ id, emoji, from: you })
     },
     switchSeat: async () => {
-      if (!record) return legacy.switchSeat!()
+      if (!record) throw new GameError('Start a fresh local preview from Home.')
       record.seat = record.seat ? 0 : 1
       advance()
       save()

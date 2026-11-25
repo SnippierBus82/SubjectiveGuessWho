@@ -62,7 +62,7 @@ export function Privacy() {
           , labeled MIT by its publisher. These are AI-generated faces with fictional names. Images
           are served by this app; we do not send your photo or game activity to Hugging Face. See
           the{' '}
-          <a href="/boards/one-million-faces-v1/NOTICE.txt">portrait source and license notice</a>.
+          <a href="/fallback-faces/NOTICE.txt">portrait source and license notice</a>.
         </p>
         <a className="button primary" href="/">
           Back to the game <ArrowRight size={18} />

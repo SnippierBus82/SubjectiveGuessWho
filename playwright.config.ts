@@ -7,7 +7,7 @@ export default defineConfig({
   workers: 1,
   timeout: 45000,
   retries: process.env.CI ? 1 : 0,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { outputFolder: 'test-results/report', open: 'never' }]],
   use: {
     baseURL: 'http://127.0.0.1:5183',
     trace: 'retain-on-failure',

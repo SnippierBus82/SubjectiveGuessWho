@@ -4,27 +4,40 @@ import { resolve, sep } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import AxeBuilder from '@axe-core/playwright'
 
-test('home previews show stable bundled faces without contacting the online source', async ({
-  page,
-}) => {
+test('home shows Neighborhood and the AI picker uses bundled previews', async ({ page }) => {
   const externalFaces: string[] = []
   page.on('request', (request) => {
     if (/huggingface\.co|\.hf\.co/.test(request.url())) externalFaces.push(request.url())
   })
   await page.goto('/')
-  await expect(page.locator('.hero-portrait img')).toHaveCount(4)
+  const hero = page.locator('.hero-face-stack img')
+  await expect(hero).toHaveCount(4)
+  await expect
+    .poll(() =>
+      hero.evaluateAll((images) =>
+        images.every(
+          (image) =>
+            (image as HTMLImageElement).naturalWidth > 0 &&
+            image.getAttribute('src')?.startsWith('/boards/Neighborhood/'),
+        ),
+      ),
+    )
+    .toBe(true)
   await page.getByRole('button', { name: 'Create game', exact: true }).click()
+  const board = page.getByLabel('Board', { exact: true })
+  await expect(board.locator('option[value="ai-random"]')).toHaveText('Random AI faces')
+  await expect(board.locator('option[value="folder/Neighborhood"]')).toHaveText('Neighborhood')
   const previews = page.locator('.board-picker-preview img')
   await expect(previews).toHaveCount(4)
   await expect
     .poll(() =>
-      page.locator('.board-picker-preview img, .hero-portrait img').evaluateAll((images) =>
+      previews.evaluateAll((images) =>
         images.every((image) => {
           const img = image as HTMLImageElement
           return (
             img.complete &&
             img.naturalWidth > 0 &&
-            img.getAttribute('src')?.startsWith('/ai-face-cache/')
+            img.getAttribute('src')?.startsWith('/fallback-faces/')
           )
         }),
       ),
@@ -40,6 +53,10 @@ test('home previews show stable bundled faces without contacting the online sour
   ).toEqual(sources)
   await page.reload()
   await expect(previews.first()).toHaveAttribute('src', sources[0]!)
+  await board.selectOption('folder/Neighborhood')
+  await page.getByLabel('What should your friend call you?').fill('Robin')
+  await page.getByRole('button', { name: 'Create game', exact: true }).click()
+  await expect(page.locator('.character-card img[src^="/boards/Neighborhood/"]')).toHaveCount(24)
   expect(externalFaces).toEqual([])
 })
 
@@ -86,10 +103,6 @@ for (const source of ['online', 'cache']) {
       () => JSON.parse(localStorage.getItem('sgw:preview2')!).state,
     )
     expect(before.boardId).toBe(boardId)
-    await mkdir('.local/previews', { recursive: true })
-    await page.screenshot({
-      path: `.local/previews/${test.info().project.name}-${source}-mobile.png`,
-    })
     const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
     expect(axe.violations).toEqual([])
     await page.locator('.character-card').nth(0).click()
@@ -102,7 +115,7 @@ for (const source of ['online', 'cache']) {
     await page.getByLabel('Your question', { exact: true }).fill('Would they enjoy a road trip?')
     await page.getByRole('button', { name: 'Ask question', exact: true }).click()
     await page.getByRole('button', { name: 'Switch seat' }).click()
-    await expect(page.locator('.answer-secret img')).toHaveAttribute('src', /\/ai-face-cache\//)
+    await expect(page.locator('.answer-secret img')).toHaveAttribute('src', /\/fallback-faces\//)
     await page.reload()
     await expect(page.locator('.answer-secret img')).toBeVisible()
     expect(
@@ -161,7 +174,7 @@ test('a new image folder appears automatically and filenames become the selected
       new RegExp(`/boards/${encodeURIComponent(name)}/`),
     )
     await page.getByLabel('Board', { exact: true }).selectOption('ai-random')
-    await expect(previews.first()).toHaveAttribute('src', /^\/ai-face-cache\//)
+    await expect(previews.first()).toHaveAttribute('src', /^\/fallback-faces\//)
     await page.getByLabel('Board', { exact: true }).selectOption(id)
     await expect(previews.first()).toHaveAttribute(
       'src',

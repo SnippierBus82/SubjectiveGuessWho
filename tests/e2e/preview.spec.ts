@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 import AxeBuilder from '@axe-core/playwright'
-import { mkdir } from 'node:fs/promises'
 
 // WebKit on Windows includes slower cold starts, reloads and accessibility scans.
 test.setTimeout(90_000)
@@ -143,8 +142,6 @@ for (const [width, height] of [
     expect(
       await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1),
     ).toBe(true)
-    await mkdir('.local/previews', { recursive: true })
-    await page.screenshot({ path: `.local/previews/v2-${width}.png` })
   })
 }
 test('mobile answer shows the private portrait, with keyboard-safe composing and axe checks', async ({
@@ -162,7 +159,6 @@ test('mobile answer shows the private portrait, with keyboard-safe composing and
   await page.setViewportSize({ width: 390, height: 844 })
   await page.getByRole('button', { name: 'Switch seat' }).click()
   await expect(page.locator('.answer-secret img')).toBeVisible()
-  await page.screenshot({ path: '.local/previews/v2-answer.png' })
   expect((await axe()).violations).toEqual([])
   await page.getByRole('button', { name: 'Emoji', exact: true }).click()
   expect((await axe()).violations).toEqual([])

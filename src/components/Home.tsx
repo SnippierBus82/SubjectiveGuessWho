@@ -345,7 +345,7 @@ export function Home({
                   </span>
                 </div>
                 <div className="hero-face-stack" aria-hidden="true">
-                  {faces.map((face, index) => (
+                  {previewBoard('folder/Neighborhood').map((face, index) => (
                     <div className={`hero-portrait face-${index}`} key={face.id}>
                       <Portrait character={face} />
                       <span>{index === 1 ? '?' : face.name}</span>

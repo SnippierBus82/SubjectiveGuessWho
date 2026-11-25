@@ -1,7 +1,17 @@
 import { randomUUID } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { AI_BOARD, type BoardCatalog } from '../src/game/board-model.ts'
-import { resolveBoard } from './faces.ts'
+import { AI_BOARD, type BoardCatalog } from '../src/game/board-model.js'
+import { resolveBoard } from './faces.js'
+
+class BoardRpcError extends Error {
+  constructor(
+    message: string,
+    readonly code: string,
+    readonly reason: string,
+  ) {
+    super(message)
+  }
+}
 
 export function backendClient(env: Record<string, string | undefined>) {
   const url = env.VITE_SUPABASE_URL,
@@ -29,11 +39,27 @@ export async function checkedRpc(
 ) {
   const { data, error } = await client.rpc(name, args)
   if (error) {
-    console.warn('Board request failed', { operation: name, code: error.code })
-    throw new Error(
+    const rejection = name === 'finish_board_v3' && error.code === 'P0001'
+    const reason =
+      rejection &&
+      /^(Invalid board|A board needs 24 images|Duplicate characters or names|Invalid character|Wrong board source)$/.test(
+        error.message,
+      )
+        ? error.message
+        : undefined
+    console.warn('Board request failed', {
+      operation: name,
+      code: error.code,
+      ...(rejection && { source: args.p_source, reason }),
+    })
+    throw new BoardRpcError(
       error.code === 'PGRST202'
         ? 'Apply the latest database migration before preparing boards.'
-        : 'Board preparation could not connect. Retry in a moment.',
+        : rejection
+          ? 'The database rejected the prepared faces. Retry or check the board backend logs.'
+          : 'Board preparation could not connect. Retry in a moment.',
+      error.code,
+      error.message,
     )
   }
   if (data?.error) throw new Error(data.error)
@@ -73,18 +99,16 @@ export async function prepareBoard(
       await Promise.all(
         resolved.uploads.slice(i, i + 6).map(async (face) => {
           const path = `${game}/${face.id}.webp`
-          const { error } = await client.storage
-            .from('game-faces')
-            .upload(path, face.bytes, {
-              contentType: 'image/webp',
-              cacheControl: '31536000',
-              upsert: false,
-              metadata: {
-                source: face.source,
-                dataset: 'RichardErkhov/OneMillionFaces',
-                license: 'MIT',
-              },
-            })
+          const { error } = await client.storage.from('game-faces').upload(path, face.bytes, {
+            contentType: 'image/webp',
+            cacheControl: '31536000',
+            upsert: false,
+            metadata: {
+              source: face.source,
+              dataset: 'RichardErkhov/OneMillionFaces',
+              license: 'MIT',
+            },
+          })
           if (
             error &&
             !['409', 'Duplicate'].includes(String('statusCode' in error ? error.statusCode : '')) &&
@@ -97,13 +121,33 @@ export async function prepareBoard(
         }),
       )
     }
-    const committed = await checkedRpc(client, 'finish_board_v3', {
+    const finishArgs = {
       p_room: room,
       p_game: game,
       p_lease: lease,
       p_source: resolved.source,
       p_characters: resolved.characters,
-    })
+    }
+    const committed = await checkedRpc(client, 'finish_board_v3', finishArgs).catch(
+      (error: unknown) => {
+        // Older deployed schemas recognize the original URL for the same bundled portraits.
+        if (
+          resolved.source !== 'cache' ||
+          !(error instanceof BoardRpcError) ||
+          error.code !== 'P0001' ||
+          error.reason !== 'Invalid character' ||
+          !resolved.characters.every((face) => face.image.startsWith('/fallback-faces/'))
+        )
+          throw error
+        return checkedRpc(client, 'finish_board_v3', {
+          ...finishArgs,
+          p_characters: resolved.characters.map((face) => ({
+            ...face,
+            image: face.image.replace('/fallback-faces/', '/ai-face-cache/'),
+          })),
+        })
+      },
+    )
     if (!committed)
       throw new Error('This game changed while the faces were preparing. Reconnect to the room.')
     return 'ready'

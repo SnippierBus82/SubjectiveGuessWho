@@ -19,7 +19,12 @@ if (!configured || process.env.TEST_ALLOW_EMPTY_DATABASE !== 'yes') {
       throw new Error(
         'Refusing to test against an initialized database. Use an empty disposable PostgreSQL cluster.',
       )
-    for (const suite of ['tests/database.test.ts', 'tests/v2.test.ts', 'tests/boards.test.ts', 'tests/folder-boards.test.ts']) {
+    for (const suite of [
+      'tests/rooms.test.ts',
+      'tests/gameplay.test.ts',
+      'tests/matchmaking.test.ts',
+      'tests/folder-boards.test.ts',
+    ]) {
       const database = `sgw_test_${randomUUID().replaceAll('-', '')}`
       if (!/^sgw_test_[a-f0-9]{32}$/.test(database))
         throw new Error('Invalid disposable database name')

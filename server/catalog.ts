@@ -2,7 +2,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 import { createHash } from 'node:crypto'
 import sharp from 'sharp'
-import type { BoardCatalog, FolderBoard, ImageCharacter } from '../src/game/board-model.ts'
+import type { BoardCatalog, FolderBoard, Character } from '../src/game/board-model.ts'
 
 const supported = new Set(['.png', '.jpg', '.jpeg', '.webp', '.avif', '.svg'])
 const hash = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
@@ -16,7 +16,7 @@ export async function discoverBoards(root: string, strict = true): Promise<Board
     try {
       if (folder.name.length > 120 || `folder/${encodeURIComponent(folder.name)}`.length > 400)
         throw new Error('The folder name is too long.')
-      const characters: ImageCharacter[] = [],
+      const characters: Character[] = [],
         names = new Set<string>(),
         images = new Set<string>()
       for (const file of (
@@ -63,11 +63,11 @@ export async function discoverBoards(root: string, strict = true): Promise<Board
       console.warn(message)
     }
   }
-  const cacheDirectory = join(root, 'public', 'ai-face-cache')
+  const cacheDirectory = join(root, 'public', 'fallback-faces')
   const cache = (await readdir(cacheDirectory))
     .filter((file) => /^seed\d+\.webp$/.test(file))
     .sort()
-    .map((file) => ({ id: `cached-${basename(file, '.webp')}`, image: `/ai-face-cache/${file}` }))
+    .map((file) => ({ id: `cached-${basename(file, '.webp')}`, image: `/fallback-faces/${file}` }))
   if (cache.length < 24) throw new Error('The AI fallback needs at least 24 cached portraits.')
   return { boards, cache }
 }

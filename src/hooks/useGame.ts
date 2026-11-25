@@ -252,7 +252,7 @@ export function useGame(roomId: string | null) {
         syncInFlight.current
       )
         return
-      if (current.rulesVersion !== 2 || !service.heartbeat) {
+      if (!service.heartbeat) {
         resume()
         return
       }
@@ -273,7 +273,7 @@ export function useGame(roomId: string | null) {
         heartbeatPending = false
       }
     }
-    const reconcile = setInterval(() => void pulse(), state.rulesVersion === 2 ? 15000 : 60000)
+    const reconcile = setInterval(() => void pulse(), 15000)
     return () => {
       cancelled = true
       dispose?.()
@@ -290,7 +290,6 @@ export function useGame(roomId: string | null) {
   }, [
     state?.roomId,
     state?.you,
-    state?.rulesVersion,
     service,
     sync,
     displayReaction,

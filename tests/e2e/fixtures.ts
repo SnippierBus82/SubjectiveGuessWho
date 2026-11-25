@@ -1,11 +1,14 @@
 import { test as base, expect } from '@playwright/test'
-import catalog from '../../.generated/boards.json' with { type: 'json' }
+import { readFileSync } from 'node:fs'
 import names from '../../src/game/neutral-names.json' with { type: 'json' }
-import { sample } from '../../src/game/board-model'
+import { sample, type BoardCatalog } from '../../src/game/board-model'
 
 // Local images stand in for resolved provider bytes. Provider/download/storage behavior
 // is exercised separately in folder-boards.test.ts, not by a live public API in CI.
 export function previewResult(source = 'cache') {
+  const catalog = JSON.parse(
+    readFileSync(new URL('../../.generated/boards.json', import.meta.url), 'utf8'),
+  ) as BoardCatalog
   const selectedNames = sample(names, 24)
   return {
     source,

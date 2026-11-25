@@ -48,8 +48,8 @@ export default defineConfig(({ mode }) => ({
       configureServer(server) {
         const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env }
         server.middlewares.use((request, response, next) => {
-          if (request.url?.startsWith('/boards/one-million-faces-v1/'))
-            request.url = request.url.replace('/boards/one-million-faces-v1/', '/ai-face-cache/')
+          if (request.url?.startsWith('/ai-face-cache/'))
+            request.url = request.url.replace('/ai-face-cache/', '/fallback-faces/')
           if (request.url?.split('?')[0] !== '/api/boards') {
             next()
             return

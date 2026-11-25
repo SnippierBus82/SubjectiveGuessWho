@@ -24,9 +24,8 @@ import {
   WifiOff,
   X,
 } from 'lucide-react'
-import { characters } from '../game/legacy/characters'
-import type { Character } from '../game/characters'
-import { DEFAULT_TIMINGS, timeLabel } from '../game/timings'
+import type { Character } from '../game/board-model'
+import { timeLabel } from '../game/timings'
 import { boardInfo } from '../game/boards'
 import { REACTIONS } from '../game/types'
 import type { GameController } from '../hooks/useGame'
@@ -35,7 +34,6 @@ import { CharacterBoard, Portrait } from './CharacterBoard'
 import { Logo } from './Home'
 import { LogoMark } from './LogoMark'
 import { QuestionIdeas } from './QuestionIdeas'
-import { GameRoom as LegacyGameRoom } from './LegacyGameRoom'
 import { Sheet } from './Sheet'
 import { GameMenu } from './GameMenu'
 
@@ -69,27 +67,22 @@ export function GameRoom({ controller }: { controller: GameController }) {
   }, [])
   return (
     <>
-      {controller.state!.rulesVersion !== 2 ? (
-        <LegacyGameRoom controller={controller} onMenu={() => setMenu(true)} />
-      ) : (
-        <ModernRoom
-          key={controller.state!.game.id + controller.state!.you}
-          controller={controller}
-          onMenu={() => setMenu(true)}
-        />
-      )}
+      <Room
+        key={controller.state!.game.id + controller.state!.you}
+        controller={controller}
+        onMenu={() => setMenu(true)}
+      />
       {menu && <GameMenu controller={controller} onClose={() => setMenu(false)} />}
     </>
   )
 }
-function ModernRoom({ controller, onMenu }: { controller: GameController; onMenu: () => void }) {
+function Room({ controller, onMenu }: { controller: GameController; onMenu: () => void }) {
   const s = controller.state!,
     g = s.game,
-    flow = g.flow!,
+    flow = g.flow,
     me = s.players.find((p) => p.id === s.you)!,
     other = s.players.find((p) => p.id !== s.you)
-  const board = s.board ?? characters,
-    settings = s.settings ?? DEFAULT_TIMINGS
+  const { board, settings } = s
   const waitingForBoard = s.boardStatus === 'pending' || s.boardStatus === 'error'
   const now = useNow() + controller.clockOffset
   const key = `${s.roomId}:${g.id}:${s.you}`
@@ -876,7 +869,7 @@ function ModernRoom({ controller, onMenu }: { controller: GameController; onMenu
           title={sheet === 'guess' ? `Is it ${inspected.name}?` : inspected.name}
           onClose={() => setSheet(null)}
         >
-          <div className="inspected-portrait" style={{ background: inspected.color }}>
+          <div className="inspected-portrait">
             <Portrait character={inspected} />
           </div>
           {sheet === 'guess' ? (

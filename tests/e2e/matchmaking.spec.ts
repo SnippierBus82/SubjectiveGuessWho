@@ -1,5 +1,4 @@
-import { test, expect } from './fixtures'
-import { boardFor } from '../../src/game/legacy/boards'
+import { test, expect, previewResult } from './fixtures'
 const me = '00000000-0000-4000-8000-000000000001',
   other = '00000000-0000-4000-8000-000000000002',
   room = '00000000-0000-4000-8000-000000000003',
@@ -9,6 +8,7 @@ for (const outcome of ['cancel', 'match', 'requeue', 'leave-queue'])
   test(`online player search can ${outcome} without a second login or leaked queue`, async ({
     page,
   }) => {
+    const board = previewResult().characters
     await page.clock.install()
     await page.routeWebSocket('wss://online-test.supabase.co/**', (socket) => socket.close())
     await page.route('**/src/lib/config.ts', (route) =>
@@ -79,12 +79,11 @@ for (const outcome of ['cancel', 'match', 'requeue', 'leave-queue'])
             state: {
               roomId: requestedRoom,
               code: 'ABC1234',
-              rulesVersion: 2,
               version: noShow ? 2 : 1,
               settings: { question: 120, answer: 30, review: 60 },
               mode: 'match',
               boardId: 'ai-random',
-              board: boardFor('million-faces-shuffle-v1', 123),
+              board,
               serverNow: new Date().toISOString(),
               you: me,
               players: [
@@ -99,7 +98,6 @@ for (const outcome of ['cancel', 'match', 'requeue', 'leave-queue'])
               ],
               game: {
                 id: requestedRoom,
-                packId: 'generated-v1',
                 phase: ended ? 'finished' : 'lobby',
                 endReason: ended ? 'no_show' : null,
                 turn: 0,

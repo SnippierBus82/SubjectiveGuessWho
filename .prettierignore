@@ -1,7 +1,7 @@
 node_modules
 dist
 package-lock.json
-public/characters
-playwright-report
+.generated
+public/fallback-faces
 test-results
 .local

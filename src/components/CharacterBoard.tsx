@@ -1,8 +1,6 @@
 import { Check, X } from 'lucide-react'
-import { lazy, memo, Suspense } from 'react'
-import { characters } from '../game/legacy/characters'
-import type { Character } from '../game/characters'
-const LegacyPortrait = lazy(() => import('./LegacyPortrait'))
+import { memo } from 'react'
+import type { Character } from '../game/board-model'
 
 export function Portrait({
   character,
@@ -11,17 +9,11 @@ export function Portrait({
   character: Character
   className?: string
 }) {
-  if (character.traits)
-    return (
-      <Suspense fallback={<span className="portrait" aria-label="Loading portrait" />}>
-        <LegacyPortrait character={character} className={className} />
-      </Suspense>
-    )
   return (
     <img
       className={`portrait ${className}`}
       src={character.image}
-      alt={character.alt ?? character.name}
+      alt={character.name}
       width="160"
       height="180"
       draggable="false"
@@ -30,7 +22,7 @@ export function Portrait({
   )
 }
 interface BoardProps {
-  board?: Character[]
+  board: Character[]
   inspect?: boolean
   onInspect?: (id: string) => void
   mode: 'select' | 'eliminate' | 'guess'
@@ -40,7 +32,7 @@ interface BoardProps {
   onPick: (id: string) => void
 }
 export const CharacterBoard = memo(function CharacterBoard({
-  board = characters,
+  board,
   inspect = false,
   onInspect,
   mode,
@@ -62,7 +54,6 @@ export const CharacterBoard = memo(function CharacterBoard({
             aria-pressed={mode === 'eliminate' ? removed : chosen}
             disabled={disabled}
             onClick={() => (inspect ? onInspect?.(character.id) : onPick(character.id))}
-            style={{ '--portrait-bg': character.color ?? '#eee7df' } as React.CSSProperties}
           >
             <span className="portrait-frame">
               <Portrait character={character} />

@@ -1,6 +1,5 @@
 import catalog from '../../.generated/boards.json' with { type: 'json' }
-import { AI_BOARD, sample, type BoardCatalog } from './board-model'
-import type { Character } from './characters'
+import { AI_BOARD, sample, type BoardCatalog, type Character } from './board-model'
 import names from './neutral-names.json' with { type: 'json' }
 
 export type BoardId = string

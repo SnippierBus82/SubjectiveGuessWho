@@ -1,4 +1,4 @@
-import type { Character } from './characters'
+import type { Character } from './board-model'
 import type { BoardId } from './boards'
 export interface Timings {
   question: number | null
@@ -52,12 +52,11 @@ export interface Question {
   asker: string
   text: string
   answer: boolean | null
-  status: 'pending' | 'answered' | 'unanswered'
+  status: 'pending' | 'answered'
   askedAt: string
 }
 export interface Game {
   id: string
-  packId: string
   phase: Phase
   turn: number
   activePlayer: string | null
@@ -66,7 +65,7 @@ export interface Game {
   guesser: string | null
   guessCharacter: string | null
   result: 'correct' | 'incorrect' | null
-  flow?: TurnFlow
+  flow: TurnFlow
   pause?: Pause | null
   endReason?: string | null
 }
@@ -81,9 +80,8 @@ export interface RoomState {
   myCharacter: string | null
   reveals: Record<string, string> | null
   history: Question[]
-  rulesVersion?: number
-  settings?: Timings
-  board?: Character[]
+  settings: Timings
+  board: Character[]
   boardId?: BoardId
   mode?: 'private' | 'match'
   boardStatus?: 'pending' | 'ready' | 'error'

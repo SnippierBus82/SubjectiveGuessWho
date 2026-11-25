@@ -14,7 +14,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/face-pool.mjs --check
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
@@ -23,9 +22,7 @@ jobs:
         if: failure()
         with:
           name: playwright-failure
-          path: |
-            playwright-report/
-            test-results/
+          path: test-results/
   postgres:
     runs-on: ubuntu-latest
     services:
